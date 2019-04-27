@@ -62,6 +62,20 @@ class Map:
             return None
 
         return min(l, key = lambda u : dist(u, unit))
+    def low_hp_unit(self, unit):
+        l = [_ for _ in self.units if _.team is not unit.team and _.state is not State.DEAD]
+        if len(l) == 0:
+            return None
+
+        return min(l, key = lambda u : u.hp)
+    def high_hp_unit(self, unit):
+        l = [_ for _ in self.units if _.team is not unit.team and _.state is not State.DEAD]
+        if len(l) == 0:
+            return None
+
+        return max(l, key = lambda u : u.hp)
+    
+        
     """
     Transformer une coordonnee world en coordonnee map
     """
@@ -125,7 +139,9 @@ class Map:
                         object.xmap = i
                         object.ymap = j
                     self.cases[i][j][k] = object
-
+    def remove(self, x, y, z):
+        if self.cases[x][y][z] in self.units:
+            self.units.remove(self.cases[x][y][z])
     def write_file(self, path):
         f = open(path, 'w')
         f.write(str(self.width))
