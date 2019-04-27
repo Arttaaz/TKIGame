@@ -57,19 +57,19 @@ class Etat:
         est actif.
         """
         self.nom_etat = nom_etat
-        self.action = action_associee
+        self.action_associee = action_associee
 
     def execute(self):
         """
         Fonction activant l'état, exécute la première action.
         """
-        self.action.execute()
+        self.action_associee.execute()
 
     def __str__(self):
         """
         Description de l'objet.
         """
-        return "***\n[{}]\n".format(self.nom_etat) + str(self.action) + "\n***\n"
+        return "***\n[{}]\n".format(self.nom_etat) + str(self.action_associee) + "\n***\n"
 
 
 class Action:
