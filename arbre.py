@@ -31,6 +31,7 @@ class Arbre:
                 self.etat_courant = etat
                 print(self.etat_courant)
                 break
+
     def eval(self):
         """
         Execute l'état courant.
