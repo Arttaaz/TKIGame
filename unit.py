@@ -30,9 +30,9 @@ class Unit(GameObject):
     def update(self, collisions):
         self
 
-    def move(self, destination):
-        if dist((self.xmap, self.ymap), (destination.xmap, destination.ymap)) >= 3:
-            path = list(astar.find_path(self.grid.coord_of(self, 1), self.grid.coord_of(destination, 1), neighbors_fnct=neighbors_map(self.grid, destination), heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist))
+    def move(self):
+        if self.can_shoot():
+            path = list(astar.find_path(self.grid.coord_of(self, 1), self.grid.coord_of(self.target, 1), neighbors_fnct=neighbors_map(self.grid, self.target), heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist))
             x0, y0 = self.grid.coord_of(self, 1)
             x1, y1 = path[1]
             self.grid.cases[x0][y0][1] = None
@@ -50,7 +50,9 @@ class Unit(GameObject):
         return( 180 - y.angle_to(dir)) % 360
 
     def can_shoot(self):
-        if dist((self.xmap, self.ymap), (destination.xmap, destination.ymap)) >= 3: # TODO: change 3 to range
+        if dist((self.xmap, self.ymap), (self.target.xmap, self.target.ymap)) >= 3: # TODO: change 3 to range
+            return true  # TODO: line_of_sight function
+
 
     def update(self, map):
 

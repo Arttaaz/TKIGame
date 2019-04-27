@@ -16,12 +16,14 @@ object = map.cases[4][4][1]
 while 1:
     clock.tick(60)
     for event in pygame.event.get():
-        if event == pygame.QUIT:
+        if event.type == pygame.QUIT:
             sys.exit()
         if event.type == pygame.KEYUP:
             print(event.key)
             if event.key == pygame.K_RIGHT:
-                object.move(map.cases[7][3][1])
+                object.team = 2
+                object.target = map.cases[7][3][1]
+
     map.update()
     screen.fill(black)
     map.draw(screen, screen.get_width() / 2, screen.get_height() / 2)
