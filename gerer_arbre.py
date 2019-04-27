@@ -195,6 +195,7 @@ if __name__ == "__main__":
     from arbre import *
     from creer_arbre import *
 
+    map = Map(64, "assets/map.map")
     arbre = creer_unite_attaque()
 
     screen = pygame.display.set_mode((1180, 640))
