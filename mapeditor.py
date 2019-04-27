@@ -33,9 +33,9 @@ while 1:
             if event.key == pygame.K_LEFT:
                 layer -= 1
         if event.type == pygame.MOUSEBUTTONDOWN:
-            map_pos_x, map_pos_y = (map.world_to_map(event.pos[0]),
-                           map.world_to_map(event.pos[1]))
-            id = map.id(map_pos_x, map_pos_y, layer)
+            map_pos_x, map_pos_y = (map.world_to_map_x(int(event.pos[0] - screen.get_width() / 2)),
+                           map.world_to_map_y(int(event.pos[1] - screen.get_height() / 2)))
+            id = map.id(int(map_pos_x), int(map_pos_y), layer)
             if event.button == 3:
                 if id > 0:
                     id -= 1
@@ -44,9 +44,11 @@ while 1:
                 
             map.cases[map_pos_x][map_pos_y][layer] = generate_object(id)
 
-                
+
+
+    map.update()
     screen.fill(black)
 
-    map.draw(screen)
+    map.draw(screen, screen.get_width() / 2, screen.get_height() / 2)
     pygame.display.flip()
     
