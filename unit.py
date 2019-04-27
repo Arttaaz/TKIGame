@@ -30,14 +30,14 @@ class Unit(GameObject):
         pass
 
     def move(self, destination):
-        path = list(astar.find_path(self.grid.coord_of(self, 1), self.grid.coord_of(destination, 1), neighbors_fnct=neighbors,
-         heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist))
-        x0, y0 = self.grid.coord_of(self, 1)
-        x1, y1 = path[1]
-        print(path)
-        print(path[1])
-        self.grid.cases[x0][y0].remove(self)
-        self.grid.cases[x1][y1][1] = self
+        if dist((self.xmap, self.ymap), (destination.xmap, destination.ymap)) >= 3:
+            path = list(astar.find_path(self.grid.coord_of(self, 1), self.grid.coord_of(destination, 1), neighbors_fnct=neighbors_map(self.grid, destination), heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist))
+            x0, y0 = self.grid.coord_of(self, 1)
+            x1, y1 = path[1]
+            self.grid.cases[x0][y0][1] = None
+            self.grid.cases[x1][y1][1] = self
+            self.xmap = x1
+            self.ymap = y1
 
     def set_inner_state(self, state):
         self.state = state
@@ -56,6 +56,9 @@ class Unit(GameObject):
         dir = pos2 - pos1
         y = pygame.Vector2(0, 1)
         return( 180 - y.angle_to(dir)) % 360
+
+    def can_shoot(self):
+        if dist((self.xmap, self.ymap), (destination.xmap, destination.ymap)) >= 3: # TODO: change 3 to range
 
     def update(self, map):
 
@@ -103,10 +106,22 @@ class Unit(GameObject):
                                 (p2.x, p2.y))
 
 
+def neighbors_map(map, goal):
+    def neighbors(unit):
+        x, y = unit
+        l = []
+        if x < (map.width-1) and (map.cases[x+1][y][1] is None or map.cases[x+1][y][1] == goal or not map.cases[x+1][y][1].collide):
+            l.append((x+1, y))
+        if x > 0 and (map.cases[x-1][y][1] is None or map.cases[x-1][y][1] == goal or not map.cases[x-1][y][1].collide):
+            l.append((x-1, y))
+        if y < (map.height-1) and (map.cases[x][y+1][1] is None or map.cases[x][y+1][1] == goal or not map.cases[x][y+1][1].collide):
+            l.append((x, y+1))
+        if y > 0 and (map.cases[x][y-1][1] is None or map.cases[x][y-1][1] == goal or not map.cases[x][y-1][1].collide):
+            l.append((x, y-1))
+        return l
 
-def neighbors(unit):
-    x, y = unit
-    return [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]
+    return neighbors
+
 
 def cost(n, goal):
     return 1

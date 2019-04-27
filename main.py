@@ -11,8 +11,7 @@ screen = pygame.display.set_mode(size)
 path = "assets/map.map"
 map = Map(64, path=path, depth=1)
 
-map.cases[4][2][1] = map.generate_object(2, 4, 2)
-map.cases[6][5][1] = map.generate_object(2, 6, 5)
+object = map.cases[4][4][1]
 
 while 1:
     clock.tick(60)
@@ -22,7 +21,7 @@ while 1:
         if event.type == pygame.KEYUP:
             print(event.key)
             if event.key == pygame.K_RIGHT:
-                map.cases[4][2][1].move(map.cases[6][5][1])
+                object.move(map.cases[7][3][1])
     map.update()
     screen.fill(black)
     map.draw(screen, screen.get_width() / 2, screen.get_height() / 2)
