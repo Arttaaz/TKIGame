@@ -19,7 +19,7 @@ def creer_unite_attaque():
     marcher_vers1 = Action('Marcher vers', action_inutile, ["Cible courante"], None)
     changer_etat2 = Action('Changer état', action_inutile, ["Idle"], None)
     rien_faire1 = Action('Rien changer', action_inutile, None, None)
-    est_mort1 = Action('Est mort', action_inutile, ["Cible courante"], {"Oui" : changer_etat2, "Non" : rien_faire1})
+    est_mort1 = Action('Est mort', action_inutile, ["Cible courante"], {"Oui" : changer_etat2})
     attaquer1 = Action('Attaquer', action_inutile, ["Cible courante"], est_mort1)
     est_a_portee1 = Action('Est à portée', action_inutile, ["Cible courante"], {"Oui" : attaquer1, "Non" : marcher_vers1})
     attaquer_cible = Etat(est_a_portee1, 'Attaquer cible')

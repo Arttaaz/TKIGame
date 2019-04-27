@@ -102,12 +102,12 @@ class Action:
         exécutée ici ('action_associée').
         """
         if self.params_action_associee is not None:
-            numero_action_suivante = self.action_associee(self.params_action_associee)
+            numero_action_suivante = self.action_associee(*self.params_action_associee)
         else:
             key_action_suivante = self.action_associee()
 
         if self.list_actions_suivantes is not None:
-            if type(self.list_actions_suivantes) == type({}): # fonction suivante dépends de la sortie de la fonction courante
+            if type(self.list_actions_suivantes) == type({}) and key_action_suivante in self.list_actions_suivantes: # fonction suivante dépends de la sortie de la fonction courante
                 self.list_actions_suivantes[key_action_suivante].execute() # exécute l'action suivante
             else:
                 self.list_actions_suivantes.execute() # cas où la fonction suivante n'a pas de condition

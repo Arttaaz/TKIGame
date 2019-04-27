@@ -12,6 +12,7 @@ from afficher_arbre import AfficherArbre, centrer_objet
 from modifier_arbre import Modification
 from dimensions import *
 
+PADDING_ENCADREMENT = 10
 
 class GererArbre:
     """
@@ -66,7 +67,24 @@ class GererArbre:
 
             rect_courant.top = rect_courant.top + pas_bouton
 
-        pygame.font.quit()
+    def uptdate_main_screen(self):
+        """
+        Update tous les dessins sauf les encadrements
+        des rects.
+        Permet surtout d'actualisé les modifs, et d'effacer
+        les encadrements.
+        """
+        self.dico_rect_attributs = self.afficher_arbre.afficher_arbre()
+        for m in self.modifs:
+            m.dessiner_modification(self.screen) # dessine les modifs
+
+    def encadrer_rect(self, rect):
+        """
+        Encadre un objet de type 'Rect'.
+        Permet de montrer ce qu'a sélectionné l'utilisateur.
+        """
+        point_list = ((rect.left-PADDING_ENCADREMENT, rect.top-PADDING_ENCADREMENT), (rect.left+rect.width+PADDING_ENCADREMENT, rect.top-PADDING_ENCADREMENT), (rect.left+rect.width+PADDING_ENCADREMENT, rect.top+rect.height+PADDING_ENCADREMENT), (rect.left-PADDING_ENCADREMENT, rect.top+rect.height+PADDING_ENCADREMENT))
+        pygame.draw.lines(self.screen, (255, 0, 0), True, point_list, 2)
 
     def boucle_principale(self):
         """
@@ -75,13 +93,14 @@ class GererArbre:
         """
         self.lancer_affichage() # dessine l'affichage
         pygame.display.update() # actualise la fenêtre
-        attr_selectionne = None # si vaut None, on a sélectionné aucun attribut de l'arbre
+        self.attr_selectionne = None # si vaut None, on a sélectionné aucun attribut de l'arbre
+        self.ligne_selectionnee = None # same
 
-        modifs = [] # tableau des modifs à faire
-        quitter = False
-        sauvegarder = False
+        self.modifs = [] # tableau des modifs à faire
+        self.quitter = False
+        self.sauvegarder = False
 
-        while not quitter:
+        while not self.quitter:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
@@ -89,40 +108,76 @@ class GererArbre:
                     if event.button == 1: #clic gauche
                         obj_click = has_clicked_on_rect(self.dico_rect_attributs, event) # regarde d'abord si on a clické sur un attribut
                         if obj_click is not None: # on a clické sur un attribut
-                            if attr_selectionne is None: # premier attribut qu'on sélectionne
-                                attr_selectionne = obj_click
-                            else: # dessine la modification proposée
-                                modifs.append(Modification(attr_selectionne[0], attr_selectionne[1], obj_click[0], obj_click[1])) # ajoute au tab des modifs
-                                modifs[-1].dessiner_modification(self.screen)
-                                pygame.display.update()
-                                attr_selectionne = None
-
+                            self.gerer_click_arbre(obj_click)
                         obj_click = has_clicked_on_rect(self.dico_rect_boutons, event) # regarde si on a clické sur un bouton
                         if obj_click is not None: # on a clické sur un bouton
-                            if obj_click[0] == "Save & quit":
-                                quitter = True
-                                sauvegarder = True
-                            elif obj_click[0] == "Cancel":
-                                quitter = True
-                            elif obj_click[0] == "Reset":
-                                modifs = []
-                                self.dico_rect_attributs = self.afficher_arbre.afficher_arbre()
-                                pygame.display.update()
+                            self.gerer_click_bouton(obj_click)
 
+            self.uptdate_main_screen()
+            if self.ligne_selectionnee is not None:
+                self.encadrer_rect(self.ligne_selectionnee[1])
+            elif self.attr_selectionne is not None:
+                self.encadrer_rect(self.attr_selectionne[1])
+            pygame.display.update() # actualise tout le temps l'affichage pour pas se casser le cul
             pygame.time.delay(100)
 
         # fin de la boucle while : on regarde si on sauvegarde ou pas
-        if sauvegarder:
-            for m in modifs:
+        if self.sauvegarder:
+            for m in self.modifs:
                 m.effectuer_modification()
 
 
-    def gerer_click(self, obj_click):
+    def gerer_click_arbre(self, obj_click):
         """
         Assume que l'objet sur lequel on a clické n'est pas None.
-        Effectue les actions associé au clic.
+        Effectue les actions associées au clic.
         """
-        pass
+        if type(obj_click[0]) is type([]): # si on a un tableau, c'est que on a clické sur une ligne
+            self.ligne_selectionnee = obj_click # selectionne la ligne
+            self.attr_selectionne = None # reinit la variable
+        else: # on a clické sur un attribut
+            if self.ligne_selectionnee is not None: # créé la modif associée
+                attr_a_modifier, ancien_attr, attr_souhaite = self.ligne_selectionnee[0][0], self.ligne_selectionnee[0][1], obj_click[0]
+                debut_ligne = self.ligne_selectionnee[0][3]
+                ancien_fin_ligne = self.ligne_selectionnee[0][4]
+                fin_ligne = (obj_click[1].left+obj_click[1].width//2, obj_click[1].top)
+                self.gerer_nouveau_modif(Modification(attr_a_modifier, ancien_attr, attr_souhaite, debut_ligne, ancien_fin_ligne, fin_ligne, self.afficher_arbre.font_params, self.ligne_selectionnee[0][2]))
+                self.ligne_selectionnee = None
+            elif self.attr_selectionne is None: # premier attribut qu'on sélectionne et on a pas sélectionner une ligne
+                if obj_click[0].list_actions_suivantes is None: # il est possible de sélectionner uniquement un attribut qui est en fin d'arbre
+                    self.attr_selectionne = obj_click
+            else: # dessine la modification proposée
+                attr_a_modifier, attr_souhaite = self.attr_selectionne[0], obj_click[0]
+                debut_ligne = (self.attr_selectionne[1].left+self.attr_selectionne[1].width//2, self.attr_selectionne[1].top+self.attr_selectionne[1].height)
+                fin_ligne = (obj_click[1].left+obj_click[1].width//2, obj_click[1].top)
+                self.gerer_nouveau_modif(Modification(attr_a_modifier, None, attr_souhaite, debut_ligne, None, fin_ligne)) # ajoute au tab des modifs
+                self.attr_selectionne = None
+                self.ligne_selectionnee = None
+
+    def gerer_click_bouton(self, obj_click):
+        """
+        Assume que l'objet sur lequel on a clické n'est pas None.
+        Effectue les actions associées au clic.
+        """
+        if obj_click[0] == "Save & quit":
+            self.quitter = True
+            self.sauvegarder = True
+        elif obj_click[0] == "Cancel":
+            self.quitter = True
+        elif obj_click[0] == "Reset":
+            self.modifs = []
+            pygame.display.update()
+
+    def gerer_nouveau_modif(self, modif):
+        """
+        Ajoute la modif si l'attribut_debut n'a pas déjà été utilisé dans une autre modification.
+        Sinon remplace les modifs (évite les doublons non authorisés).
+        """
+        for num, m in enumerate(self.modifs):
+            if m.attribut_depart is modif.attribut_depart and m.condition is modif.condition: # doublon non authorisé !
+                self.modifs[num] = modif
+                return
+        self.modifs.append(modif)
 
 
 def has_clicked_on_rect(dico_rect, event):
