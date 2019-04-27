@@ -26,7 +26,8 @@ class GererArbre:
         self.arbre = arbre
         self.afficher_arbre = AfficherArbre(arbre, screen)
 
-        self.background_bouton = pygame.image.load('assets/arbre/background_bouton.jpg').convert()
+        self.background_bouton = pygame.image.load('assets/arbre/background_bouton.jpeg').convert()
+        self.background_clavier = pygame.image.load('assets/arbre/background_clavier.jpg').convert()
 
     def lancer_affichage(self):
         """
@@ -49,10 +50,11 @@ class GererArbre:
         nom_boutons = ["Save & quit", "Reset", "Cancel"]
         pas_bouton = HAUTEUR_TOTAL // 3 # décalage en hauteur d'un bouton à l'autre
         rect_bouton = self.background_bouton.get_rect()
-
+        coord_initial = (PADDING_COTES+LONGUEUR_ARBRE, PADDING_HAUT)
         self.dico_rect_boutons = {}
 
-        rect_courant = pygame.Rect(PADDING_COTES+LONGUEUR_ARBRE, PADDING_HAUT, LONGUEUR_BOUTON, pas_bouton)
+        rect_courant = pygame.Rect(coord_initial[0], coord_initial[1], LONGUEUR_BOUTON, pas_bouton)
+        self.screen.blit(self.background_clavier, coord_initial)
         for nom in nom_boutons:
             coords = centrer_objet((rect_courant.left, rect_courant.top), (rect_bouton.width, rect_bouton.height), (rect_courant.width, rect_courant.height))
             self.screen.blit(self.background_bouton, coords)
@@ -104,7 +106,7 @@ class GererArbre:
                                 quitter = True
                             elif obj_click[0] == "Reset":
                                 modifs = []
-                                self.lancer_affichage()
+                                self.dico_rect_attributs = self.afficher_arbre.afficher_arbre()
                                 pygame.display.update()
 
             pygame.time.delay(100)
@@ -149,6 +151,5 @@ if __name__ == "__main__":
     screen.fill((255, 255, 255))
 
     g = GererArbre(screen, arbre)
-    g.boucle_principale()
     g.boucle_principale()
     pygame.quit()

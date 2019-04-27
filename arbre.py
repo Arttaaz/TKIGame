@@ -15,12 +15,13 @@ class Arbre:
     Objet principal permettant
     la description d'un cablâge.
     """
-    def __init__(self, list_etats, etat_initial):
+    def __init__(self, list_etats, etat_initial, nom_arbre="NOM ARBRE"):
         """
         Initialise l'état courant de l'arbre (état qui sera exécuté
         lors de l'évaluation de l'arbre).
         Récupère aussi la liste des états possibles de l'arbre.
         """
+        self.nom_arbre = nom_arbre
         self.list_etats = list_etats
         self.etat_courant = etat_initial
 
