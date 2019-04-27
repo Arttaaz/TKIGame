@@ -1,8 +1,8 @@
 """
-Module gérant les fonctionnalités suivantes:
+Module gÃ©rant les fonctionnalitÃ©s suivantes:
     - affiche un arbre par dessus le screen
-    - modifie l'arbre en respectant des conditions (nombre de modifications limitées etc ...)
-    - quitte proprement ces fonctionnalités avec l'arbre bien modifié
+    - modifie l'arbre en respectant des conditions (nombre de modifications limitÃ©es etc ...)
+    - quitte proprement ces fonctionnalitÃ©s avec l'arbre bien modifiÃ©
 """
 
 import pygame
@@ -15,12 +15,12 @@ from dimensions import *
 
 class GererArbre:
     """
-    Objet permettant toutes les fonctionnalitées cités plus haut.
+    Objet permettant toutes les fonctionnalitÃ©es citÃ©s plus haut.
     """
     def __init__(self, screen, arbre):
         """
         N'a besoin que du screen et d'un arbre.
-        On pourra donner des règles en argument plus tard ?
+        On pourra donner des rÃ¨gles en argument plus tard ?
         """
         self.screen = screen
         self.arbre = arbre
@@ -31,7 +31,7 @@ class GererArbre:
 
     def lancer_affichage(self):
         """
-        Affiche les éléments principaux sur le screen.
+        Affiche les Ã©lÃ©ments principaux sur le screen.
         """
         self.dico_rect_attributs = self.afficher_arbre.afficher_arbre()
         self.afficher_UI()
@@ -42,13 +42,13 @@ class GererArbre:
             - bouton sauvegarder & quitter
             - bouton reset modifs
             - bouton annuler & quitter
-        Sauvegarde un dico associant chaque rect à son bouton.
+        Sauvegarde un dico associant chaque rect Ã  son bouton.
         """
         pygame.font.init()
         font_bouton = pygame.font.SysFont(pygame.font.get_default_font(), 20, bold=True)
 
         nom_boutons = ["Save & quit", "Reset", "Cancel"]
-        pas_bouton = HAUTEUR_TOTAL // 3 # décalage en hauteur d'un bouton à l'autre
+        pas_bouton = HAUTEUR_TOTAL // 3 # dÃ©calage en hauteur d'un bouton Ã  l'autre
         rect_bouton = self.background_bouton.get_rect()
         coord_initial = (PADDING_COTES+LONGUEUR_ARBRE, PADDING_HAUT)
         self.dico_rect_boutons = {}
@@ -70,14 +70,14 @@ class GererArbre:
 
     def boucle_principale(self):
         """
-        Gère l'ensemble de la fenêtre ici. Les boutons sont gérés
+        GÃ¨re l'ensemble de la fenÃªtre ici. Les boutons sont gÃ©rÃ©s
         ici aussi.
         """
         self.lancer_affichage() # dessine l'affichage
-        pygame.display.update() # actualise la fenêtre
-        attr_selectionne = None # si vaut None, on a sélectionné aucun attribut de l'arbre
+        pygame.display.update() # actualise la fenÃªtre
+        attr_selectionne = None # si vaut None, on a sÃ©lectionnÃ© aucun attribut de l'arbre
 
-        modifs = [] # tableau des modifs à faire
+        modifs = [] # tableau des modifs Ã  faire
         quitter = False
         sauvegarder = False
 
@@ -87,18 +87,18 @@ class GererArbre:
                     sys.exit()
                 elif event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1: #clic gauche
-                        obj_click = has_clicked_on_rect(self.dico_rect_attributs, event) # regarde d'abord si on a clické sur un attribut
-                        if obj_click is not None: # on a clické sur un attribut
-                            if attr_selectionne is None: # premier attribut qu'on sélectionne
+                        obj_click = has_clicked_on_rect(self.dico_rect_attributs, event) # regarde d'abord si on a clickÃ© sur un attribut
+                        if obj_click is not None: # on a clickÃ© sur un attribut
+                            if attr_selectionne is None: # premier attribut qu'on sÃ©lectionne
                                 attr_selectionne = obj_click
-                            else: # dessine la modification proposée
+                            else: # dessine la modification proposÃ©e
                                 modifs.append(Modification(attr_selectionne[0], attr_selectionne[1], obj_click[0], obj_click[1])) # ajoute au tab des modifs
                                 modifs[-1].dessiner_modification(self.screen)
                                 pygame.display.update()
                                 attr_selectionne = None
 
-                        obj_click = has_clicked_on_rect(self.dico_rect_boutons, event) # regarde si on a clické sur un bouton
-                        if obj_click is not None: # on a clické sur un bouton
+                        obj_click = has_clicked_on_rect(self.dico_rect_boutons, event) # regarde si on a clickÃ© sur un bouton
+                        if obj_click is not None: # on a clickÃ© sur un bouton
                             if obj_click[0] == "Save & quit":
                                 quitter = True
                                 sauvegarder = True
@@ -119,16 +119,16 @@ class GererArbre:
 
     def gerer_click(self, obj_click):
         """
-        Assume que l'objet sur lequel on a clické n'est pas None.
-        Effectue les actions associé au clic.
+        Assume que l'objet sur lequel on a clickÃ© n'est pas None.
+        Effectue les actions associÃ© au clic.
         """
         pass
 
 
 def has_clicked_on_rect(dico_rect, event):
     """
-    Retourne l'attribut / le bouton sur lequel a clické l'utilisateur,
-    s'il a clické sur un attribut / bouton !
+    Retourne l'attribut / le bouton sur lequel a clickÃ© l'utilisateur,
+    s'il a clickÃ© sur un attribut / bouton !
     """
     for key in dico_rect:
         rect = pygame.Rect(key)
@@ -141,7 +141,8 @@ if __name__ == "__main__":
     from creer_arbre import *
 
     map = Map(64, "assets/map.map")
-    arbre = creer_unite_attaque()
+    
+    arbre = creer_unite_attaque(Unit(self, "assets/1.png", map, 0, 0))
 
     screen = pygame.display.set_mode((1180, 640))
     background = pygame.image.load('assets/background.jpg').convert(screen)

@@ -6,16 +6,18 @@ from enum import Enum
 import astar
 from gameobject import GameObject
 
-class State(Enum):
-    IDLE = 1
-    SHOOT = 2
-    DEAD = 3
+class InnerState(Enum):
+    IDLE = "Idle"
+    SHOOT = "Attaquer"
+    DEAD = "DEAD"
+class Target(Enum):
+    NEAREST_ENEMY = "Plus proche ennemi"
 bullet_time = 0.3
 
 class Unit(GameObject):
     def __init__(self, image, grid, xmap, ymap, id = 1, collide = True, team = 1):
         GameObject.__init__(self, image, grid, xmap, ymap, id, collide)
-        self.state = State.SHOOT
+        self.state = InnerState.SHOOT
         self.target = None
         self.xmap = xmap
         self.ymap = ymap
@@ -27,9 +29,6 @@ class Unit(GameObject):
     def follow(self, target):
         pass
 
-    def update(self, collisions):
-        self
-
     def move(self, destination):
         path = list(astar.find_path(self.grid.coord_of(self, 1), self.grid.coord_of(destination, 1), neighbors_fnct=neighbors,
          heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist))
@@ -40,7 +39,16 @@ class Unit(GameObject):
         self.grid.cases[x0][y0].remove(self)
         self.grid.cases[x1][y1][1] = self
 
-
+    def set_inner_state(self, state):
+        self.state = state
+    def set_tree_state(self, state):
+        self.arbre_etat_courant = state
+    def select_target(self, target):
+        if target == Target.NEAREST_ENEMY:
+            self.target = map.closest_unit(self, self.team, False)
+    def est_a_portee(self):
+        return 
+        pass
     def rotation_to_target(self):
 
         pos1 = pygame.Vector2(self.rect.centerx, self.rect.centery)
@@ -51,10 +59,12 @@ class Unit(GameObject):
 
     def update(self, map):
 
+        #self.arbre.eval()
+        
         if self.target is None:
             self.target = map.closest_unit(self)
 
-        if self.state == State.SHOOT and self.target is not None:
+        if self.state == InnerState.SHOOT and self.target is not None:
             self.rotation = 0.9 * self.rotation + 0.1 * self.rotation_to_target()
             self.bullet_progress += 1 / 60 / (bullet_time)
 
@@ -64,13 +74,13 @@ class Unit(GameObject):
                 self.target = map.closest_unit(self)
 
         if self.hp < 0:
-            self.state = State.DEAD
+            self.state = InnerState.DEAD
             self.rotation += 1
 
     def draw(self, screen, x, y):
         super().draw(screen, x, y)
 
-        if self.state == State.SHOOT and self.target is not None:
+        if self.state == InnerState.SHOOT and self.target is not None:
             pos1 = pygame.Vector2(self.rect.centerx, self.rect.centery)
             pos2 = pygame.Vector2(self.target.rect.centerx, self.target.rect.centery)
             dir = (pos2 - pos1).normalize()
