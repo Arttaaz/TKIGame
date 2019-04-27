@@ -1,5 +1,7 @@
 import sys, pygame
 from map import Map
+from enum import Enum
+from state import State, GameState
 
 pygame.init()
 
@@ -10,8 +12,7 @@ clock = pygame.time.Clock()
 screen = pygame.display.set_mode(size)
 path = "assets/map.map"
 map = Map(64, path=path, depth=1)
-
-object = map.cases[4][4][1]
+GSStack = [GameState.BEFORE_SIMU] # TODO: change to menu later when menu exists
 
 while 1:
     clock.tick(60)
@@ -20,8 +21,6 @@ while 1:
             sys.exit()
         if event.type == pygame.KEYUP:
             print(event.key)
-            if event.key == pygame.K_RIGHT:
-                object.team = 2
 
     map.update()
     screen.fill(black)
