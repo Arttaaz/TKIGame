@@ -30,13 +30,13 @@ class Unit(pygame.sprite.Sprite):
 
 
 def neighbors(unit):
-    x, y = unit.grid.coord_of(unit)
+    x, y = unit.grid.coord_of(unit, 1)
     return [unit.grid.cases[x+1, y], unit.grid.cases[x-1, y], unit.grid.cases[x, y+1], unit.grid.cases[x, y-1]]
 
 def cost(n, goal):
     return 1
 
 def dist(u0, u1):
-    x0, y0 = u0.grid.coord_of(u0)
-    x1, y1 = u1.grid.coord_of(u1)
+    x0, y0 = u0.grid.coord_of(u0, 1)
+    x1, y1 = u1.grid.coord_of(u1, 1)
     return ((x1 - x0)**2 + (y1 - y0)**2)**0.5

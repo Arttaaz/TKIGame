@@ -42,12 +42,12 @@ class Map:
         else:
             return object.id
 
-    def coord_of(self, gameObject):
+    def coord_of(self, gameObject, layer):
         for x in range(0, self.width):
             for y in range(0, self.height):
-                if case[x][y] = gameObject:
+                if case[layer][x][y] = gameObject:
                     return (x, y)
-        return None            
+        return None
 
 
 def generate_object(id):
