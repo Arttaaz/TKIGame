@@ -59,4 +59,4 @@ class Modification:
         if self.condition is None:
             self.attribut_depart.list_actions_suivantes = self.attribut_fin
         else:
-            self.attribut_depart.list_actions_suivantes[condition] = self.attribut_fin
+            self.attribut_depart.list_actions_suivantes[self.condition] = self.attribut_fin

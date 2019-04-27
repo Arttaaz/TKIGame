@@ -18,13 +18,13 @@ while 1:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
-        if event.type == pygame.KEYUP:
+        if event.type == pygame.KEYDOWN:
             print(event.key)
             if event.key == pygame.K_s:
                 print(event.key)
                 map.write_file(path)
             if event.key == pygame.K_l:
-                map = Map(30, path = path)
+                map = Map(64, path = path)
             if event.key == pygame.K_RIGHT:
                 print(layer)
                 layer += 1
@@ -32,6 +32,8 @@ while 1:
                     map.resize(depth = layer + 1)
             if event.key == pygame.K_LEFT:
                 layer -= 1
+                if layer < 0:
+                    layer = 0
         if event.type == pygame.MOUSEBUTTONDOWN:
             map_pos_x, map_pos_y = (map.world_to_map_x(int(event.pos[0] - screen.get_width() / 2)),
                            map.world_to_map_y(int(event.pos[1] - screen.get_height() / 2)))
