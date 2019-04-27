@@ -5,7 +5,7 @@ A map.
 from gameobject import GameObject
 import pygame
 class Map:
-    
+
     def __init__(self, cell_size, width = 0, height = 0, path = None):
         self.cell_size = cell_size
         if path is not None:
@@ -42,12 +42,21 @@ class Map:
         else:
             return object.id
 
+    def coord_of(self, gameObject):
+        for x in range(0, self.width):
+            for y in range(0, self.height):
+                if case[x][y] = gameObject:
+                    return (x, y)
+        return None            
+
+
 def generate_object(id):
     if id == 0:
         game_object = None
     else:
         game_object = GameObject(pygame.image.load('assets/' + str(id) + '.png'), id, False)
     return game_object
+
 def read_cases(content, width, height):
     objects = (generate_object(int(c)) for line in content for c in line.split())
     cases = [[None for j in range(height)] for i in range(width)]
@@ -68,13 +77,13 @@ def write_file(path, map):
 def read_file(path):
     f = open(path, 'r')
     lines = iter(f.readlines())
-        
+
     width = int(next(lines))
     height = int(next(lines))
-    cases = read_cases(lines, width, height) 
+    cases = read_cases(lines, width, height)
 
     if len(cases) != width or len(cases[0]) != height:
         print("Erreur dans les dimensions de la map chargée")
     f.close()
-        
+
     return width, height, cases
