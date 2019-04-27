@@ -84,13 +84,14 @@ class Action:
     def __init__(self, nom, action_associee, params_action_associee, list_actions_suivantes):
         """
         Si list_actions_suivantes vaut None, alors c'est que c'est la fin de l'arbre.
+        Si params_action_associee vaut None, alors il n'y a pas de paramètres pour l'action associée.
         """
         self.nom = nom
         self.action_associee = action_associee
         self.params_action_associee = params_action_associee
         self.list_actions_suivantes = list_actions_suivantes
 
-    def execute():
+    def execute(self):
         """
         Lance l'action associée, et réagit en fonction.
         En fonction de ce que renvoie l'action, on execute
@@ -100,9 +101,16 @@ class Action:
         de la place est le numéro que renvoie l'action
         exécutée ici ('action_associée').
         """
-        numero_action_suivante = self.action_associee(self.params)
-        if list_actions_suivantes is not None:
-            self.list_actions_suivantes[numero_action_suivante].execute() # exécute l'action suivante
+        if self.params_action_associee is not None:
+            numero_action_suivante = self.action_associee(self.params_action_associee)
+        else:
+            key_action_suivante = self.action_associee()
+
+        if self.list_actions_suivantes is not None:
+            if type(self.list_actions_suivantes) == type({}): # fonction suivante dépends de la sortie de la fonction courante
+                self.list_actions_suivantes[key_action_suivante].execute() # exécute l'action suivante
+            else:
+                self.list_actions_suivantes.execute() # cas où la fonction suivante n'a pas de condition
 
     def __str__(self):
         """
