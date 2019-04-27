@@ -21,7 +21,7 @@ class Unit(GameObject):
         self.target = None
         self.xmap = xmap
         self.ymap = ymap
-        self.team = team
+        self.team = id
         self.hp = 100
         self.bullet_progress = 0
         self.start_shooting_time = 0
@@ -31,7 +31,7 @@ class Unit(GameObject):
         pass
 
 
-    def move(self):
+    def move(self, param):
         if not self.can_shoot():
             path = list(astar.find_path(self.grid.coord_of(self, 1), self.grid.coord_of(self.target, 1), neighbors_fnct=neighbors_map(self.grid, self.target), heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist))
             x0, y0 = self.grid.coord_of(self, 1)
@@ -47,13 +47,13 @@ class Unit(GameObject):
     def set_tree_state(self, state):
         print("set state" + str(state))
         print("set state" + str(self.arbre.etat_courant))
-        self.arbre.etat_courant = state
+        self.arbre.set_state(state)
     def select_target(self, target):
         if target == Target.NEAREST_ENEMY:
             self.target = self.grid.closest_unit(self, False)
-    def shoot(self):
+    def shoot(self, param):
         self.set_inner_state(shoot)
-    def est_a_portee(self):
+    def est_a_portee(self, param):
         return  "Oui" if self.target is not None and dist((self.target.xmap, self.target.ymap)) <= 5 else "Non"
     def rotation_to_target(self):
 
@@ -62,7 +62,7 @@ class Unit(GameObject):
         dir = pos2 - pos1
         y = pygame.Vector2(0, 1)
         return( 180 - y.angle_to(dir)) % 360
-    def is_dead(self):
+    def is_dead(self, param):
         if self.target.state == InnerState.DEAD:
             return "Oui"
         else:
@@ -78,7 +78,7 @@ class Unit(GameObject):
 
     def update(self, map):
 
-        self.arbre.eval()
+        self.bullet_progress += 1 / 60 / (bullet_time)
         if self.target is None:
             self.target = map.closest_unit(self)
 
@@ -88,12 +88,14 @@ class Unit(GameObject):
                 self.bullet_progress += 1 / 60 / (bullet_time)
 
                 if self.bullet_progress > 1:
-                    self.bullet_progress = 0
                     self.target.hp -= 10
                     self.target = map.closest_unit(self)
             else:
                 self.move()
-
+        if self.bullet_progress > 1:
+            self.bullet_progress = 0
+            self.arbre.eval()
+        
         if self.hp < 0:
             self.state = InnerState.DEAD
             self.rotation += 1
