@@ -22,7 +22,6 @@ while 1:
             print(event.key)
             if event.key == pygame.K_RIGHT:
                 object.team = 2
-                object.target = map.cases[7][3][1]
 
     map.update()
     screen.fill(black)

@@ -31,7 +31,7 @@ class Unit(GameObject):
 
 
     def move(self):
-        if self.can_shoot():
+        if not self.can_shoot():
             path = list(astar.find_path(self.grid.coord_of(self, 1), self.grid.coord_of(self.target, 1), neighbors_fnct=neighbors_map(self.grid, self.target), heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist))
             x0, y0 = self.grid.coord_of(self, 1)
             x1, y1 = path[1]
@@ -59,25 +59,28 @@ class Unit(GameObject):
         return( 180 - y.angle_to(dir)) % 360
 
     def can_shoot(self):
-        if dist((self.xmap, self.ymap), (self.target.xmap, self.target.ymap)) >= 3: # TODO: change 3 to range
-            return true  # TODO: line_of_sight function
+        if dist((self.xmap, self.ymap), (self.target.xmap, self.target.ymap)) <= 3: # TODO: change 3 to range
+            return True  # TODO: line_of_sight function
+        return False
 
 
     def update(self, map):
 
         #self.arbre.eval()
-
         if self.target is None:
             self.target = map.closest_unit(self)
 
         if self.state == InnerState.SHOOT and self.target is not None:
-            self.rotation = 0.9 * self.rotation + 0.1 * self.rotation_to_target()
-            self.bullet_progress += 1 / 60 / (bullet_time)
+            if self.can_shoot():
+                self.rotation = 0.9 * self.rotation + 0.1 * self.rotation_to_target()
+                self.bullet_progress += 1 / 60 / (bullet_time)
 
-            if self.bullet_progress > 1:
-                self.bullet_progress = 0
-                self.target.hp -= 10
-                self.target = map.closest_unit(self)
+                if self.bullet_progress > 1:
+                    self.bullet_progress = 0
+                    self.target.hp -= 10
+                    self.target = map.closest_unit(self)
+            else:
+                self.move()
 
         if self.hp < 0:
             self.state = InnerState.DEAD
