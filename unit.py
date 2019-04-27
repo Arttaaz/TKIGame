@@ -5,13 +5,13 @@ import pygame
 from enum import Enum
 import astar
 from gameobject import GameObject
-
+from creer_arbre import *
+from target import Target
 class InnerState(Enum):
     IDLE = "Idle"
     SHOOT = "Attaquer"
     DEAD = "DEAD"
-class Target(Enum):
-    NEAREST_ENEMY = "Plus proche ennemi"
+
 bullet_time = 0.3
 
 class Unit(GameObject):
@@ -26,6 +26,7 @@ class Unit(GameObject):
         self.bullet_progress = 0
         self.start_shooting_time = 0
         self.start_shooting = False
+        self.arbre = creer_unite_attaque(self)
     def follow(self, target):
         pass
 
@@ -41,15 +42,19 @@ class Unit(GameObject):
             self.ymap = y1
 
     def set_inner_state(self, state):
+        print("set state" + str(state))
         self.state = state
     def set_tree_state(self, state):
-        self.arbre_etat_courant = state
+        print("set state" + str(state))
+        print("set state" + str(self.arbre.etat_courant))
+        self.arbre.etat_courant = state
     def select_target(self, target):
         if target == Target.NEAREST_ENEMY:
-            self.target = map.closest_unit(self, self.team, False)
+            self.target = self.grid.closest_unit(self, False)
+    def shoot(self):
+        self.set_inner_state(shoot)
     def est_a_portee(self):
-        return
-        pass
+        return  "Oui" if self.target is not None and dist((self.target.xmap, self.target.ymap)) <= 5 else "Non"
     def rotation_to_target(self):
 
         pos1 = pygame.Vector2(self.rect.centerx, self.rect.centery)
@@ -57,15 +62,21 @@ class Unit(GameObject):
         dir = pos2 - pos1
         y = pygame.Vector2(0, 1)
         return( 180 - y.angle_to(dir)) % 360
-
+    def is_dead(self):
+        if self.target.state == InnerState.DEAD:
+            return "Oui"
+        else:
+            return "Non"
+        
+        
     def can_shoot(self):
-        if dist((self.xmap, self.ymap), (self.target.xmap, self.target.ymap)) >= 3: # TODO: change 3 to range
-            return true  # TODO: line_of_sight function
+        if self.target is not None and dist((self.xmap, self.ymap), (self.target.xmap, self.target.ymap)) >= 3: # TODO: change 3 to range
+            return True  # TODO: line_of_sight function
 
 
     def update(self, map):
 
-        #self.arbre.eval()
+        self.arbre.eval()
 
         if self.target is None:
             self.target = map.closest_unit(self)

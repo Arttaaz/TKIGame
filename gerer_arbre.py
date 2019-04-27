@@ -141,7 +141,8 @@ if __name__ == "__main__":
     from creer_arbre import *
 
     map = Map(64, "assets/map.map")
-    arbre = creer_unite_attaque()
+    
+    arbre = creer_unite_attaque(Unit(self, "assets/1.png", map, 0, 0))
 
     screen = pygame.display.set_mode((1180, 640))
     background = pygame.image.load('assets/background.jpg').convert(screen)
