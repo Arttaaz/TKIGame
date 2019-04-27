@@ -29,6 +29,7 @@ class Arbre:
         for etat in self.list_etats:
             if etat.nom_etat == nom_etat:
                 self.etat_courant = etat
+                print(self.etat_courant)
                 break
     def eval(self):
         """
@@ -112,8 +113,9 @@ class Action:
             key_action_suivante = self.action_associee()
 
         if self.list_actions_suivantes is not None:
-            if type(self.list_actions_suivantes) == type({}) and key_action_suivante in self.list_actions_suivantes: # fonction suivante dépends de la sortie de la fonction courante
-                self.list_actions_suivantes[key_action_suivante].execute() # exécute l'action suivante
+            if type(self.list_actions_suivantes) == type({}):
+                if key_action_suivante in self.list_actions_suivantes: # fonction suivante dépends de la sortie de la fonction courante
+                    self.list_actions_suivantes[key_action_suivante].execute() # exécute l'action suivante
             else:
                 self.list_actions_suivantes.execute() # cas où la fonction suivante n'a pas de condition
 

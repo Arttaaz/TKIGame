@@ -47,7 +47,6 @@ while 1:
 
 
 
-    map.update()
     screen.fill(black)
 
     map.draw(screen, screen.get_width() / 2, screen.get_height() / 2)

@@ -46,7 +46,9 @@ class State:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
-
+            if self.state[len(self.state)-1] == GameState.BEFORE_SIMU:
+                if event.type == pygame.MOUSEBUTTONUP:
+                    
 
     #draw all states onto screen in order first to current (except menu)
     def draw(self):
