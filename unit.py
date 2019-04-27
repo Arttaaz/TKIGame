@@ -11,11 +11,12 @@ from target import Target
 class InnerState(Enum):
     IDLE = "Idle"
     SHOOT = "Attaquer"
+    SHOOT_FAILED = "Attaque impossible..."
     WALK = "Marche"
     DEAD = "DEAD"
 
 bullet_time = 0.3
-
+tick_time = 2
 class Unit(GameObject):
     def __init__(self, image, grid, xmap, ymap, id = 1, collide = True, team = 1):
         GameObject.__init__(self, image, grid, xmap, ymap, id, collide)
@@ -23,9 +24,12 @@ class Unit(GameObject):
         self.target = None
         self.xmap = xmap
         self.ymap = ymap
+        self.xdest = xmap
+        self.ydest = ymap 
         self.team = id
         self.hp = 100
         self.bullet_progress = 0
+        self.tick_progress = 0
         self.start_shooting_time = 0
         self.start_shooting = False
         self.arbre = creer_unite_attaque(self)
@@ -34,20 +38,15 @@ class Unit(GameObject):
 
 
     def move(self, param):
-        print("Moooooooooooooooooooove"  + str(self.xmap) + " " + str(self.ymap) + " " + str(self.target.xmap) + " " + str(self.target.ymap))
         if self.target is not None:
             path = astar.find_path((self.xmap, self.ymap), (self.target.xmap, self.target.ymap), neighbors_fnct=neighbors_map(self.grid, self.target), heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist)
             if path is not None:
                 path = list(path)
                 x0, y0 = self.xmap, self.ymap
                 x1, y1 = path[1]
-                self.grid.cases[x0][y0][1] = None
-                self.grid.cases[x1][y1][1] = self
-                self.xmap = x1
-                self.ymap = y1
-            else:
-                print("paaaaaaas de chemin gros")
-
+                self.state = InnerState.WALK
+                self.xdest = x1
+                self.ydest = y1
     def set_inner_state(self, state):
         self.state = state
     def set_tree_state(self, state):
@@ -56,7 +55,10 @@ class Unit(GameObject):
         if target == Target.NEAREST_ENEMY:
             self.target = self.grid.closest_unit(self, True)
     def shoot(self, param):
-        self.set_inner_state(InnerState.SHOOT)
+        if self.target is not None and self.can_shoot():
+            self.set_inner_state(InnerState.SHOOT)
+        else:
+            self.set_inner_state(InnerState.SHOOT_FAILED)
     def est_a_portee(self, param):
         return  "Oui" if self.target is not None and dist((self.target.xmap, self.target.ymap), (self.xmap, self.ymap)) <= 3 else "Non"
     def rotation_to_target(self):
@@ -74,15 +76,28 @@ class Unit(GameObject):
 
 
     def can_shoot(self):
-
         if self.target is not None and dist((self.xmap, self.ymap), (self.target.xmap, self.target.ymap)) <= 3: # TODO: change 3 to range
             return True  # TODO: line_of_sight function
         return False
 
-
+    def tick(self):
+        if self.state == InnerState.SHOOT:
+               self.target.hp -= 1
+        if self.state == InnerState.SHOOT_FAILED:
+            pass
+        if self.state == InnerState.WALK:
+            self.grid.cases[self.xmap][self.ymap][1] = None
+            self.grid.cases[self.xdest][self.ydest][1] = self
+            self.xmap = self.xdest
+            self.ymap = self.ydest
+        self.tick_progress = 0
+            
+        self.arbre.eval()
+        
+        
     def update(self, map):
 
-        self.bullet_progress += 1 / 60 / (bullet_time)
+        self.tick_progress += 1 / 60 / (tick_time)
 
         if self.target is None:
             self.target = map.closest_unit(self)
@@ -95,9 +110,9 @@ class Unit(GameObject):
 
                 if self.bullet_progress > 1:
                     self.target.hp -= 1
-        if self.bullet_progress > 1:
-            self.bullet_progress = 0
-            self.arbre.eval()
+        if self.tick_progress > 1:
+            self.tick()
+            
         
         if self.hp < 0:
             self.state = InnerState.DEAD
@@ -110,6 +125,8 @@ class Unit(GameObject):
             pos1 = pygame.Vector2(self.rect.centerx, self.rect.centery)
             pos2 = pygame.Vector2(self.target.rect.centerx, self.target.rect.centery)
             dir = (pos2 - pos1).normalize()
+            self.bullet_progress = self.tick_progress * 2
+            self.bullet_progress = 1 if self.bullet_progress > 1 else self.bullet_progress
             begin = pos1 +  dir * 23
             end = pos2 - dir * 11
 
