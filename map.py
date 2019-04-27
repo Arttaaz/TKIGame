@@ -118,7 +118,7 @@ class Map:
     def generate_object(self, id, x, y):
         if id == 0:
             game_object = None
-        elif id in range(2, 3):
+        elif id in range(2, 4):
             game_object = Unit(pygame.image.load('assets/' + str(id) + '.png'), self, x, y, id)
             self.units.append(game_object)
         elif id in range(4, 7):
