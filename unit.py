@@ -30,6 +30,7 @@ class Unit(GameObject):
         self.ydest = ymap
         self.team = id
         self.hp = 100
+        self.hpmax = 100
         self.bullet_progress = 0
         self.tick_progress = 0
         self.start_shooting_time = 0
@@ -84,7 +85,7 @@ class Unit(GameObject):
 
     def tick(self):
         if self.state == InnerState.SHOOT and self.target is not None:
-               self.target.hp -= 100
+               self.target.hp -= 34
         if self.state == InnerState.SHOOT_FAILED:
             pass
         if self.state == InnerState.WALK:
@@ -100,7 +101,6 @@ class Unit(GameObject):
     def update(self, map):
         if self.state != InnerState.DEAD:
             self.tick_progress += 1 / 60 / (tick_time)
-        
         if self.state != InnerState.DEAD and self.tick_progress > 1:
             self.tick()
             
@@ -122,7 +122,8 @@ class Unit(GameObject):
             x += (self.xdest - self.xmap) * self.grid.cell_size * self.tick_progress
             y += (self.ydest - self.ymap) * self.grid.cell_size * self.tick_progress
         super().draw(screen, x, y)
-
+        screen.fill((255, 0, 0), rect=pygame.Rect(self.rect.centerx - 32 + 15, self.rect.centery - 32 + 50, 34 , 5))
+        screen.fill((0, 255, 0), rect=pygame.Rect(self.rect.centerx - 32 + 15, self.rect.centery - 32 + 50, int(34 * self.hp/self.hpmax), 5))
         if self.state == InnerState.SHOOT and self.target is not None and self.can_shoot():
             pos1 = pygame.Vector2(self.rect.centerx, self.rect.centery)
             pos2 = pygame.Vector2(self.target.rect.centerx, self.target.rect.centery)
