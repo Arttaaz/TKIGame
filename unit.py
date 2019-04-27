@@ -102,27 +102,12 @@ class Unit(GameObject):
     def update(self, map):
         if self.state != InnerState.DEAD:
             self.tick_progress += 1 / 60 / (tick_time)
-
-<<<<<<< HEAD
         
         if self.state != InnerState.DEAD and self.tick_progress > 1:
             self.tick()
             
         if self.hp <= 0 and self.state != InnerState.DEAD:
-=======
-        self.tick_progress += 1 / 60 / (tick_time)
 
-        if self.target is None:
-            self.target = map.closest_unit(self)
-
-        self.rotation = 0.9 * self.rotation + 0.1 * self.rotation_to_target()
-
-        if self.tick_progress > 1:
-            self.tick()
-
-
-        if self.hp < 0:
->>>>>>> 706caa76094ac75c494f28ceddcd8830bccc7f13
             self.state = InnerState.DEAD
             self.grid.cases[self.xmap][self.ymap][UNIT_LAYER] = None
             self.grid.cases[self.xmap][self.ymap][DEAD_LAYER] = self
