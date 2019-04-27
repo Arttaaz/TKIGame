@@ -31,10 +31,12 @@ class Unit(GameObject):
         self
 
     def move(self, destination):
-        path = list(astar.find_path(self.grid.coord_of(self, 1), self.grid.coord(destination, 1), neighbors_fnct=neighbors,
+        path = list(astar.find_path(self.grid.coord_of(self, 1), self.grid.coord_of(destination, 1), neighbors_fnct=neighbors,
          heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist))
         x0, y0 = self.grid.coord_of(self, 1)
-        x1, y1 = path[0]
+        x1, y1 = path[1]
+        print(path)
+        print(path[1])
         self.grid.cases[x0][y0].remove(self)
         self.grid.cases[x1][y1][1] = self
 
@@ -64,7 +66,7 @@ class Unit(GameObject):
         if self.hp < 0:
             self.state = State.DEAD
             self.rotation += 1
-            
+
     def draw(self, screen, x, y):
         super().draw(screen, x, y)
 
@@ -85,21 +87,21 @@ class Unit(GameObject):
             else:
                 t = self.bullet_progress / 0.9
                 p2 = (1 - t) * begin + t * end
-            
-            
+
+
             pygame.draw.aaline(screen, (0, 0, 0), (p1.x, p1.y),
                                 (p2.x, p2.y))
 
 
 
 def neighbors(unit):
-    x, y = unit.grid.coord_of(unit, 1)
+    x, y = unit
     return [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]
 
 def cost(n, goal):
     return 1
 
 def dist(u0, u1):
-    x0, y0 = u0.xmap, u0.ymap
-    x1, y1 = u1.xmap, u1.ymap
+    x0, y0 = u0
+    x1, y1 = u1
     return ((x1 - x0)**2 + (y1 - y0)**2)**0.5
