@@ -31,11 +31,23 @@ class Arbre:
                 self.etat_courant = etat
                 print(self.etat_courant)
                 break
+
     def eval(self):
         """
         Execute l'état courant.
         """
         self.etat_courant.execute()
+
+    def copy(self):
+        """
+        Retourne une copie de l'arbre.
+        """
+        copie_list_etats = [etat.copy() for etat in self.list_etats]
+        for etat in copie_list_etats:
+            if etat.nom_etat == self.etat_courant.nom_etat:
+                etat_courant = etat
+
+        return Arbre(copie_list_etats, etat_courant, str(self.nom_arbre))
 
     def __str__(self):
         """
@@ -71,6 +83,13 @@ class Etat:
         Fonction activant l'état, exécute la première action.
         """
         self.action_associee.execute()
+
+    def copy(self):
+        """
+        Retourne une copie de l'état.
+        """
+        return Etat(self.action_associee.copy(), self.nom_etat)
+
 
     def __str__(self):
         """
@@ -118,6 +137,21 @@ class Action:
                     self.list_actions_suivantes[key_action_suivante].execute() # exécute l'action suivante
             else:
                 self.list_actions_suivantes.execute() # cas où la fonction suivante n'a pas de condition
+
+    def copy(self):
+        """
+        Retourne une copie de l'action.
+        """
+        if self.list_actions_suivantes is None:
+            return Action(str(self.nom), self.action_associee, self.params_action_associee, None)
+
+        if type(self.list_actions_suivantes) is not type({}):
+            return Action(str(self.nom), self.action_associee, self.params_action_associee, self.list_actions_suivantes.copy())
+
+        list_actions_suivantes_copy = {}
+        for key in self.list_actions_suivantes:
+            list_actions_suivantes_copy[key] = self.list_actions_suivantes[key].copy()
+        return Action(str(self.nom), self.action_associee, self.params_action_associee, list_actions_suivantes_copy)
 
     def __str__(self):
         """

@@ -12,8 +12,6 @@ from afficher_arbre import AfficherArbre, centrer_objet
 from modifier_arbre import Modification
 from arbre import Action
 from dimensions import *
-from map import Map
-from unit import Unit
 
 PADDING_ENCADREMENT = 10
 PADDING_BOUTON_HAUT = 10
@@ -22,14 +20,19 @@ class GererArbre:
     """
     Objet permettant toutes les fonctionnalitées cités plus haut.
     """
-    def __init__(self, screen, arbre):
+    def __init__(self, screen, arbre, modifs_associees=[]):
         """
         N'a besoin que du screen et d'un arbre.
-        On pourra donner des règles en argument plus tard ?
+        Il est possible de donner un tableau de modifications qui a été
+        créé lors d'une précédente modification de l'arbre.
+        On pourra donner des règles de recâblage en argument plus tard ?
         """
         self.screen = screen
         self.arbre = arbre
         self.afficher_arbre = AfficherArbre(arbre, screen)
+
+        self.modifs_intiales = modifs_associees # modifications qu'on ne change pas (pour le cas où on sauvegarde pas)
+        self.modifs = [m for m in modifs_associees] # copie les modifs dans un nouveau tableau
 
         self.background_bouton = pygame.image.load('assets/arbre/background_bouton.jpeg').convert()
         self.background_clavier = pygame.image.load('assets/arbre/background_clavier.jpg').convert()
@@ -90,15 +93,15 @@ class GererArbre:
 
     def boucle_principale(self):
         """
-        Gère l'ensemble de la fenêtre ici. Les boutons sont gérés
-        ici aussi.
+        Gère l'ensemble de la fenêtre ici, permets de créé des modifs grâce à la
+        gestion des clics.
+        Retourne le tableau des modifs réalisées.
         """
         self.lancer_affichage() # dessine l'affichage
         pygame.display.update() # actualise la fenêtre
         self.attr_selectionne = None # si vaut None, on a sélectionné aucun attribut de l'arbre
         self.ligne_selectionnee = None # same
 
-        self.modifs = [] # tableau des modifs à faire
         self.quitter = False
         self.sauvegarder = False
 
@@ -125,9 +128,8 @@ class GererArbre:
 
         # fin de la boucle while : on regarde si on sauvegarde ou pas
         if self.sauvegarder:
-            for m in self.modifs:
-                m.effectuer_modification()
-
+            return self.modifs + self.modifs_intiales
+        return self.modifs_intiales # retourne les modifs initiales si on sauvegarde pas
 
     def gerer_click_arbre(self, obj_click):
         """
@@ -146,7 +148,7 @@ class GererArbre:
                 self.gerer_nouveau_modif(Modification(attr_a_modifier, ancien_attr, attr_souhaite, debut_ligne, ancien_fin_ligne, fin_ligne, self.afficher_arbre.font_params, self.ligne_selectionnee[0][2]))
                 self.ligne_selectionnee = None
             elif self.attr_selectionne is None: # premier attribut qu'on sélectionne et on a pas sélectionner une ligne
-                if type(obj_click) is type(Action) and obj_click[0].list_actions_suivantes is None or obj_click[0].action_associee is None: # il est possible de sélectionner uniquement un attribut qui est en fin d'arbre
+                if (type(obj_click[0]) is Action and obj_click[0].list_actions_suivantes is None) or (obj_click[0].action_associee is None): # il est possible de sélectionner uniquement un attribut qui est en fin d'arbre
                     self.attr_selectionne = obj_click
             else: # dessine la modification proposée
                 attr_a_modifier, attr_souhaite = self.attr_selectionne[0], obj_click[0]
@@ -173,7 +175,7 @@ class GererArbre:
     def gerer_nouveau_modif(self, modif):
         """
         Ajoute la modif si l'attribut_debut n'a pas déjà été utilisé dans une autre modification.
-        Sinon remplace les modifs (évite les doublons non authorisés).
+        Sinon efface les modifs (évite les doublons non authorisés) et ajoute à la fin la nouvelle modif.
         """
         for num, m in enumerate(self.modifs):
             if m.attribut_depart is modif.attribut_depart and m.condition is modif.condition: # doublon non authorisé !
@@ -210,5 +212,7 @@ if __name__ == "__main__":
     screen.fill((255, 255, 255))
 
     g = GererArbre(screen, arbre)
+    modifs = g.boucle_principale()
+    g = GererArbre(screen, arbre, modifs)
     g.boucle_principale()
     pygame.quit()
