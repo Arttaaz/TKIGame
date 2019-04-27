@@ -1,3 +1,4 @@
+
 """
 Ennemi.
 """
@@ -10,6 +11,7 @@ from target import Target
 class InnerState(Enum):
     IDLE = "Idle"
     SHOOT = "Attaquer"
+    WALK = "Marche"
     DEAD = "DEAD"
 
 bullet_time = 0.3
@@ -32,31 +34,31 @@ class Unit(GameObject):
 
 
     def move(self, param):
-        if not self.can_shoot():
-            path = astar.find_path(self.grid.coord_of(self, 1), self.grid.coord_of(self.target, 1), neighbors_fnct=neighbors_map(self.grid, self.target), heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist)
+        print("Moooooooooooooooooooove"  + str(self.xmap) + " " + str(self.ymap) + " " + str(self.target.xmap) + " " + str(self.target.ymap))
+        if self.target is not None:
+            path = astar.find_path((self.xmap, self.ymap), (self.target.xmap, self.target.ymap), neighbors_fnct=neighbors_map(self.grid, self.target), heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist)
             if path is not None:
                 path = list(path)
-                x0, y0 = self.grid.coord_of(self, 1)
+                x0, y0 = self.xmap, self.ymap
                 x1, y1 = path[1]
                 self.grid.cases[x0][y0][1] = None
                 self.grid.cases[x1][y1][1] = self
                 self.xmap = x1
                 self.ymap = y1
+            else:
+                print("paaaaaaas de chemin gros")
 
     def set_inner_state(self, state):
-        print("set state" + str(state))
         self.state = state
     def set_tree_state(self, state):
-        print("set state" + str(state))
-        print("set state" + str(self.arbre.etat_courant))
         self.arbre.set_state(state)
     def select_target(self, target):
         if target == Target.NEAREST_ENEMY:
-            self.target = self.grid.closest_unit(self, False)
+            self.target = self.grid.closest_unit(self, True)
     def shoot(self, param):
-        self.set_inner_state(shoot)
+        self.set_inner_state(InnerState.SHOOT)
     def est_a_portee(self, param):
-        return  "Oui" if self.target is not None and dist((self.target.xmap, self.target.ymap)) <= 5 else "Non"
+        return  "Oui" if self.target is not None and dist((self.target.xmap, self.target.ymap), (self.xmap, self.ymap)) <= 3 else "Non"
     def rotation_to_target(self):
 
         pos1 = pygame.Vector2(self.rect.centerx, self.rect.centery)
@@ -85,16 +87,14 @@ class Unit(GameObject):
         if self.target is None:
             self.target = map.closest_unit(self)
 
+        self.rotation = 0.9 * self.rotation + 0.1 * self.rotation_to_target()
+                
         if self.state == InnerState.SHOOT and self.target is not None:
             if self.can_shoot():
-                self.rotation = 0.9 * self.rotation + 0.1 * self.rotation_to_target()
                 self.bullet_progress += 1 / 60 / (bullet_time)
 
                 if self.bullet_progress > 1:
-                    self.target.hp -= 10
-                    self.target = map.closest_unit(self)
-            else:
-                self.move()
+                    self.target.hp -= 1
         if self.bullet_progress > 1:
             self.bullet_progress = 0
             self.arbre.eval()
@@ -106,7 +106,7 @@ class Unit(GameObject):
     def draw(self, screen, x, y):
         super().draw(screen, x, y)
 
-        if self.state == InnerState.SHOOT and self.target is not None:
+        if self.state == InnerState.SHOOT and self.target is not None and self.can_shoot():
             pos1 = pygame.Vector2(self.rect.centerx, self.rect.centery)
             pos2 = pygame.Vector2(self.target.rect.centerx, self.target.rect.centery)
             dir = (pos2 - pos1).normalize()
@@ -131,16 +131,20 @@ class Unit(GameObject):
 
 def neighbors_map(map, goal):
     def neighbors(unit):
-        x, y = unit
+        
         l = []
-        if x < (map.width-1) and (map.cases[x+1][y][1] is None or map.cases[x+1][y][1] == goal or not map.cases[x+1][y][1].collide):
-            l.append((x+1, y))
-        if x > 0 and (map.cases[x-1][y][1] is None or map.cases[x-1][y][1] == goal or not map.cases[x-1][y][1].collide):
-            l.append((x-1, y))
-        if y < (map.height-1) and (map.cases[x][y+1][1] is None or map.cases[x][y+1][1] == goal or not map.cases[x][y+1][1].collide):
-            l.append((x, y+1))
-        if y > 0 and (map.cases[x][y-1][1] is None or map.cases[x][y-1][1] == goal or not map.cases[x][y-1][1].collide):
-            l.append((x, y-1))
+        
+        if True:
+            x, y = unit
+        
+            if x < (map.width-1) and (map.cases[x+1][y][1] is None or map.cases[x+1][y][1] == goal or not map.cases[x+1][y][1].collide):
+                l.append((x+1, y))
+            if x > 0 and (map.cases[x-1][y][1] is None or map.cases[x-1][y][1] == goal or not map.cases[x-1][y][1].collide):
+                l.append((x-1, y))
+            if y < (map.height-1) and (map.cases[x][y+1][1] is None or map.cases[x][y+1][1] == goal or not map.cases[x][y+1][1].collide):
+                l.append((x, y+1))
+            if y > 0 and (map.cases[x][y-1][1] is None or map.cases[x][y-1][1] == goal or not map.cases[x][y-1][1].collide):
+                l.append((x, y-1))
         return l
 
     return neighbors
