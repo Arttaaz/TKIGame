@@ -27,7 +27,7 @@ class Unit(GameObject):
         self.xmap = xmap
         self.ymap = ymap
         self.xdest = xmap
-        self.ydest = ymap 
+        self.ydest = ymap
         self.team = id
         self.hp = 100
         self.bullet_progress = 0
@@ -40,15 +40,17 @@ class Unit(GameObject):
 
 
     def move(self, param):
-        if self.target is not None:
+        if not self.can_shoot():
             path = astar.find_path((self.xmap, self.ymap), (self.target.xmap, self.target.ymap), neighbors_fnct=neighbors_map(self.grid, self.target), heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist)
             if path is not None:
                 path = list(path)
-                x0, y0 = self.xmap, self.ymap
-                x1, y1 = path[1]
+                x, y = path[1]
+                self.grid.cases[self.xmap][self.ymap][1] = None
+                self.grid.cases[x][y][1] = self
                 self.state = InnerState.WALK
-                self.xdest = x1
-                self.ydest = y1
+                self.xdest = x
+                self.ydest = y
+
     def set_inner_state(self, state):
         self.state = state
     def set_tree_state(self, state):
@@ -93,19 +95,34 @@ class Unit(GameObject):
             self.xmap = self.xdest
             self.ymap = self.ydest
         self.tick_progress = 0
-            
+
         self.arbre.eval()
-        
-        
+
+
     def update(self, map):
         if self.state != InnerState.DEAD:
             self.tick_progress += 1 / 60 / (tick_time)
 
+<<<<<<< HEAD
         
         if self.state != InnerState.DEAD and self.tick_progress > 1:
             self.tick()
             
         if self.hp <= 0 and self.state != InnerState.DEAD:
+=======
+        self.tick_progress += 1 / 60 / (tick_time)
+
+        if self.target is None:
+            self.target = map.closest_unit(self)
+
+        self.rotation = 0.9 * self.rotation + 0.1 * self.rotation_to_target()
+
+        if self.tick_progress > 1:
+            self.tick()
+
+
+        if self.hp < 0:
+>>>>>>> 706caa76094ac75c494f28ceddcd8830bccc7f13
             self.state = InnerState.DEAD
             self.grid.cases[self.xmap][self.ymap][UNIT_LAYER] = None
             self.grid.cases[self.xmap][self.ymap][DEAD_LAYER] = self
@@ -150,7 +167,7 @@ class Unit(GameObject):
             
 def neighbors_map(map, goal):
     def neighbors(unit):
-        
+
         l = []
         
         x, y = unit

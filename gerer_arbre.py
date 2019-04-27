@@ -14,7 +14,9 @@ from arbre import Action
 from dimensions import *
 from map import Map
 from unit import Unit
+
 PADDING_ENCADREMENT = 10
+PADDING_BOUTON_HAUT = 10
 
 class GererArbre:
     """
@@ -51,23 +53,19 @@ class GererArbre:
         font_bouton = pygame.font.SysFont(pygame.font.get_default_font(), 20, bold=True)
 
         nom_boutons = ["Save & quit", "Reset", "Cancel"]
-        pas_bouton = HAUTEUR_TOTAL // 3 # décalage en hauteur d'un bouton à l'autre
+        pas_bouton = (LONGUEUR_ARBRE-LONGUEUR_MAX_NOM) // len(nom_boutons) # décalage en largeur d'un bouton à l'autre
         rect_bouton = self.background_bouton.get_rect()
-        coord_initial = (PADDING_COTES+LONGUEUR_ARBRE, PADDING_HAUT)
+        coord_initial = (PADDING_COTES+LONGUEUR_MAX_NOM, PADDING_HAUT+PADDING_BOUTON_HAUT)
         self.dico_rect_boutons = {}
 
-        rect_courant = pygame.Rect(coord_initial[0], coord_initial[1], LONGUEUR_BOUTON, pas_bouton)
-        self.screen.blit(self.background_clavier, coord_initial)
+        rect_courant = pygame.Rect(coord_initial[0], coord_initial[1], LONGUEUR_ARBRE-LONGUEUR_MAX_NOM, HAUTEUR_MAX_BOUTON)
         for nom in nom_boutons:
             coords = centrer_objet((rect_courant.left, rect_courant.top), (rect_bouton.width, rect_bouton.height), (rect_courant.width, rect_courant.height))
+            coords = (rect_courant.left, rect_courant.top)
             self.screen.blit(self.background_bouton, coords)
             self.dico_rect_boutons[coords+(rect_bouton.width, rect_bouton.height)] = nom
 
-            text = font_bouton.render(nom, True, (0, 0, 0))
-            coords = centrer_objet((rect_courant.left, rect_courant.top), (text.get_rect().width, text.get_rect().height), (rect_courant.width, rect_courant.height))
-            self.screen.blit(text, coords)
-
-            rect_courant.top = rect_courant.top + pas_bouton
+            rect_courant.left = rect_courant.left + pas_bouton
 
     def uptdate_main_screen(self):
         """
@@ -77,6 +75,8 @@ class GererArbre:
         les encadrements.
         """
         self.dico_rect_attributs = self.afficher_arbre.afficher_arbre()
+        self.afficher_UI()
+
         for m in self.modifs:
             m.dessiner_modification(self.screen) # dessine les modifs
 

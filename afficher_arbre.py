@@ -67,7 +67,7 @@ class AfficherArbre:
         longueur_ecran = self.background_arbre.get_rect().width - 2*PADDING_ARBRE_COTES # fois 2 car padding des deux côtés
         pas_etat = longueur_ecran // len(self.arbre.list_etats)
         text_nom = self.font_nom.render(self.arbre.nom_arbre, True, (0, 0, 0))
-        coord_nom_arbre = centrer_coords_longueur((PADDING_COTES+PADDING_ARBRE_COTES, PADDING_ARBRE_HAUT + PADDING_HAUT), LONGUEUR_ARBRE, text_nom.get_rect().width)
+        coord_nom_arbre = centrer_coords_longueur((PADDING_COTES+PADDING_ARBRE_COTES, PADDING_ARBRE_HAUT + PADDING_HAUT), LONGUEUR_MAX_NOM, text_nom.get_rect().width)
         coord_etat = (self.coord_background_arbre[0], coord_nom_arbre[1]+DECALAGE_ATTRIBUTS_HAUTEUR)
         coords_debut_etat = [] # tableau contenant les coords haut de chacun des états (pour tracer des lignes)
 

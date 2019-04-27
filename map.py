@@ -53,9 +53,9 @@ class Map:
         l = [_ for _ in self.units if _.team is not omit.team and _.state is not InnerState.DEAD]
         if len(l) == 0:
             return None
-        
+
         return random.choice(l)
-    
+
     def closest_unit(self, unit, ally = False):
         l = [_ for _ in self.units if _.team is not unit.team
              and _.state != InnerState.DEAD]
@@ -76,8 +76,8 @@ class Map:
             return None
 
         return max(l, key = lambda u : u.hp)
-    
-        
+
+
     """
     Transformer une coordonnee world en coordonnee map
     """
@@ -107,14 +107,6 @@ class Map:
                 return True
 
         return False
-
-
-    def coord_of(self, gameObject, depth):
-        for x in range(0, self.width):
-            for y in range(0, self.height):
-                if self.cases[x][y][depth] == gameObject:
-                    return (x, y)
-        return None
 
 
     def generate_object(self, id, x, y):
@@ -169,4 +161,3 @@ class Map:
         if len(self.cases) != self.width or len(self.cases[0]) != self.height:
             print("Erreur dans les dimensions de la map chargée")
         f.close()
-
