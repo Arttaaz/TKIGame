@@ -25,6 +25,11 @@ class Arbre:
         self.list_etats = list_etats
         self.etat_courant = etat_initial
 
+    def set_state(self, nom_etat):
+        for etat in self.list_etats:
+            if etat.nom_etat == nom_etat:
+                self.etat_courant = etat
+                break
     def eval(self):
         """
         Execute l'état courant.
@@ -102,7 +107,7 @@ class Action:
         exécutée ici ('action_associée').
         """
         if self.params_action_associee is not None:
-            numero_action_suivante = self.action_associee(*self.params_action_associee)
+            key_action_suivante = self.action_associee(*self.params_action_associee)
         else:
             key_action_suivante = self.action_associee()
 
@@ -118,8 +123,11 @@ class Action:
         """
         desc = "{} ({}) -> (".format(self.nom, self.params_action_associee)
         if self.list_actions_suivantes is not None:
-            for action in self.list_actions_suivantes:
-                desc += "[ " + str(action) + "]"
+            if type(self.list_actions_suivantes) is type({}):
+                for action in self.list_actions_suivantes:
+                    desc += "[ " + str(action) + "]"
+            else:
+                desc += "[ " + str(self.list_actions_suivantes) + "]"
         return desc + ")"
 
 

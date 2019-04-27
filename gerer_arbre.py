@@ -12,7 +12,8 @@ from afficher_arbre import AfficherArbre, centrer_objet
 from modifier_arbre import Modification
 from arbre import Action
 from dimensions import *
-
+from map import Map
+from unit import Unit
 PADDING_ENCADREMENT = 10
 
 class GererArbre:
