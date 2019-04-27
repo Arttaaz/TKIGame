@@ -11,7 +11,8 @@ import sys
 from afficher_arbre import AfficherArbre, centrer_objet
 from modifier_arbre import Modification
 from dimensions import *
-
+from map import Map
+from unit import Unit
 PADDING_ENCADREMENT = 10
 
 class GererArbre:
@@ -195,9 +196,9 @@ if __name__ == "__main__":
     from arbre import *
     from creer_arbre import *
 
-    map = Map(64, "assets/map.map")
+    map = Map(64, path = "assets/map.map")
     
-    arbre = creer_unite_attaque(Unit(self, "assets/1.png", map, 0, 0))
+    arbre = creer_unite_attaque(Unit(pygame.image.load('assets/1.png'), "assets/1.png", map, 0, 0))
 
     screen = pygame.display.set_mode((1180, 640))
     background = pygame.image.load('assets/background.jpg').convert(screen)

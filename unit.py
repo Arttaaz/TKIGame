@@ -73,7 +73,7 @@ class Unit(GameObject):
 
     def can_shoot(self):
 
-         if self.target is not None and dist((self.xmap, self.ymap), (self.target.xmap, self.target.ymap)) <= 3: # TODO: change 3 to range
+        if self.target is not None and dist((self.xmap, self.ymap), (self.target.xmap, self.target.ymap)) <= 3: # TODO: change 3 to range
             return True  # TODO: line_of_sight function
         return False
 
