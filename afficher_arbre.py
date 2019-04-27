@@ -10,6 +10,12 @@ import sys
 
 from dimensions import *
 
+PADDING_ARBRE_HAUT = 8
+PADDING_ARBRE_COTES = 20
+TAILLE_FONT_NOM = 40
+TAILLE_FONT_ATTRIBUTS = 20
+DECALAGE_ATTRIBUTS_HAUTEUR = 100 # distance entre deux attributs alignés
+
 class AfficherArbre:
     """
     Regroupe toutes les fonctions et
@@ -20,11 +26,10 @@ class AfficherArbre:
         self.arbre = arbre
         self.screen = screen
 
-        self.background_arbre = pygame.image.load('assets/arbre/background_arbre.jpg').convert()
+        self.background_arbre = pygame.image.load('assets/arbre/background_arbre.jpeg').convert()
         self.background_etat = pygame.image.load('assets/arbre/background_etat.jpeg').convert()
         self.background_action = pygame.image.load('assets/arbre/background_action.jpeg').convert()
 
-        self.padding_longueur = 20 # 20 pixels de padding (20 de chaque côté)
         self.coord_background_arbre = (PADDING_COTES, PADDING_HAUT)
         self.couleur_fleche = (255, 0, 0)
 
@@ -35,15 +40,21 @@ class AfficherArbre:
         à son attribut associé dans l'arbre (le 'Rect' en question représentant
         la place de l'attribut associé sur l'écran).
         """
+        ### Initialisations
         dico_rect = {} # Dictionnaire associant un rect à sont attribut
         pygame.font.init() # initialise le module font
-        font_etat = pygame.font.SysFont(pygame.font.get_default_font(), 20, bold=True)
+        font_etat = pygame.font.SysFont(pygame.font.get_default_font(), TAILLE_FONT_ATTRIBUTS, bold=True)
+        font_nom = pygame.font.SysFont(pygame.font.get_default_font(), TAILLE_FONT_NOM, bold=True, italic=True)
         self.screen.blit(self.background_arbre, self.coord_background_arbre)
         
-        longueur_ecran = self.background_arbre.get_rect().width - 2*self.padding_longueur # fois 2 car padding des deux côtés
+        longueur_ecran = self.background_arbre.get_rect().width - 2*PADDING_ARBRE_COTES # fois 2 car padding des deux côtés
         pas_etat = longueur_ecran // len(self.arbre.list_etats)
-        coord_etat = (self.coord_background_arbre[0], self.coord_background_arbre[1]+40)
-        
+        text_nom = font_nom.render(self.arbre.nom_arbre, True, (0, 0, 0))
+        coord_nom_arbre = centrer_coords((PADDING_COTES+PADDING_ARBRE_COTES, PADDING_ARBRE_HAUT + PADDING_HAUT), LONGUEUR_ARBRE, text_nom.get_rect().width)
+        coord_etat = (self.coord_background_arbre[0], coord_nom_arbre[1]+DECALAGE_ATTRIBUTS_HAUTEUR)
+        coords_debut_etat = [] # tableau contenant les coords haut de chacun des états (pour tracer des lignes)
+
+        ### Début de l'affichage des états et de leurs actions associées
         for etat in self.arbre.list_etats:
             rect = self.background_etat.get_rect()
             text = font_etat.render(etat.nom_etat, True, (0, 0, 0))
@@ -57,10 +68,17 @@ class AfficherArbre:
 
             self.screen.blit(self.background_etat, coords)
             self.screen.blit(text, coords_text)
-            milieu_action = self.afficher_action(etat.action_associee, (coord_etat[0], coord_etat[1]+80), pas_etat, font_etat, dico_rect) # se décale de 80 pixels en hauteur (arbitraire !)
+            milieu_action = self.afficher_action(etat.action_associee, (coord_etat[0], coord_etat[1]+DECALAGE_ATTRIBUTS_HAUTEUR), pas_etat, font_etat, dico_rect)
 
             pygame.draw.aaline(self.screen, self.couleur_fleche, fin_coords_etat, milieu_action)
             coord_etat = (coord_etat[0]+pas_etat, coord_etat[1])
+            coords_debut_etat.append((fin_coords_etat[0], coords[1]))
+
+        ### Fini par dessiner le nom de l'arbre et les liens vers etats
+        self.screen.blit(text_nom, coord_nom_arbre)
+        fin_coords_nom_arbre = (coord_nom_arbre[0]+text_nom.get_rect().width//2, coord_nom_arbre[1]+text_nom.get_rect().height)
+        for coords in coords_debut_etat:
+            pygame.draw.aaline(self.screen, self.couleur_fleche, fin_coords_nom_arbre, coords)
 
         pygame.font.quit() # termine le module font
         return dico_rect
@@ -91,7 +109,7 @@ class AfficherArbre:
         coords_fin_action = (coord_action[0] + place_dispo_largeur//2, coord_action[1]+self.background_action.get_rect().height)
         pas_action = place_dispo_largeur // len(action.list_actions_suivantes)
         for a in action.list_actions_suivantes:
-            milieu_coords = self.afficher_action(a, (coord_action[0], coord_action[1]+70), pas_action, font_action, dico_rect) # se décale de 70 pixels en hauteur (arbitraire !)
+            milieu_coords = self.afficher_action(a, (coord_action[0], coord_action[1]+DECALAGE_ATTRIBUTS_HAUTEUR), pas_action, font_action, dico_rect)
             pygame.draw.aaline(self.screen, self.couleur_fleche, coords_fin_action, milieu_coords)
             coord_action = (pas_action + coord_action[0], coord_action[1])
 
