@@ -55,7 +55,7 @@ class GererArbre:
         pygame.font.init()
         font_bouton = pygame.font.SysFont(pygame.font.get_default_font(), 20, bold=True)
 
-        nom_boutons = ["Save & quit", "Reset", "Cancel"]
+        nom_boutons = ["Save", "Reset", "Cancel", "Quit"]
         pas_bouton = (LONGUEUR_ARBRE-LONGUEUR_MAX_NOM) // len(nom_boutons) # décalage en largeur d'un bouton à l'autre
         rect_bouton = self.background_bouton.get_rect()
         coord_initial = (PADDING_COTES+LONGUEUR_MAX_NOM, PADDING_HAUT+PADDING_BOUTON_HAUT)
@@ -163,11 +163,13 @@ class GererArbre:
         Assume que l'objet sur lequel on a clické n'est pas None.
         Effectue les actions associées au clic.
         """
-        if obj_click[0] == "Save & quit":
+        if obj_click[0] == "Save":
             self.quitter = True
             self.sauvegarder = True
-        elif obj_click[0] == "Cancel":
+        elif obj_click[0] == "Quit":
             self.quitter = True
+        elif obj_click[0] == "Cancel":
+            self.modifs.pop() # retire la dernière modif
         elif obj_click[0] == "Reset":
             self.modifs = []
             pygame.display.update()
@@ -179,8 +181,10 @@ class GererArbre:
         """
         for num, m in enumerate(self.modifs):
             if m.attribut_depart is modif.attribut_depart and m.condition is modif.condition: # doublon non authorisé !
-                self.modifs[num] = modif
+                self.modifs.remove(num) # supprime l'entrée
+                self.modifs.append(modif)
                 return
+
         self.modifs.append(modif)
 
 
