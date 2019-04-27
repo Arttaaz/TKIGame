@@ -26,7 +26,7 @@ class State:
                 self.draw()
 
             elif self.state[len(self.state)-1] == GameState.SIMU:
-
+                pass
             else:
                 sys.exit()
 
