@@ -16,11 +16,13 @@ class InnerState(Enum):
     DEAD = "DEAD"
 
 bullet_time = 0.3
-tick_time = 2
+tick_time = 1
+UNIT_LAYER = 2
+DEAD_LAYER = 1
 class Unit(GameObject):
     def __init__(self, image, grid, xmap, ymap, id = 1, collide = True, team = 1):
         GameObject.__init__(self, image, grid, xmap, ymap, id, collide)
-        self.state = InnerState.SHOOT
+        self.state = InnerState.IDLE
         self.target = None
         self.xmap = xmap
         self.ymap = ymap
@@ -81,13 +83,13 @@ class Unit(GameObject):
         return False
 
     def tick(self):
-        if self.state == InnerState.SHOOT:
-               self.target.hp -= 1
+        if self.state == InnerState.SHOOT and self.target is not None:
+               self.target.hp -= 100
         if self.state == InnerState.SHOOT_FAILED:
             pass
         if self.state == InnerState.WALK:
-            self.grid.cases[self.xmap][self.ymap][1] = None
-            self.grid.cases[self.xdest][self.ydest][1] = self
+            self.grid.cases[self.xmap][self.ymap][UNIT_LAYER] = None
+            self.grid.cases[self.xdest][self.ydest][UNIT_LAYER] = self
             self.xmap = self.xdest
             self.ymap = self.ydest
         self.tick_progress = 0
@@ -96,36 +98,36 @@ class Unit(GameObject):
         
         
     def update(self, map):
+        if self.state != InnerState.DEAD:
+            self.tick_progress += 1 / 60 / (tick_time)
 
-        self.tick_progress += 1 / 60 / (tick_time)
-
-        if self.target is None:
-            self.target = map.closest_unit(self)
-
-        self.rotation = 0.9 * self.rotation + 0.1 * self.rotation_to_target()
-                
-        if self.state == InnerState.SHOOT and self.target is not None:
-            if self.can_shoot():
-                self.bullet_progress += 1 / 60 / (bullet_time)
-
-                if self.bullet_progress > 1:
-                    self.target.hp -= 1
-        if self.tick_progress > 1:
+        
+        if self.state != InnerState.DEAD and self.tick_progress > 1:
             self.tick()
             
-        
-        if self.hp < 0:
+        if self.hp <= 0 and self.state != InnerState.DEAD:
             self.state = InnerState.DEAD
+            self.grid.cases[self.xmap][self.ymap][UNIT_LAYER] = None
+            self.grid.cases[self.xmap][self.ymap][DEAD_LAYER] = self
+            
+        if self.state == InnerState.DEAD:
             self.rotation += 1
+        elif self.target is not None:
+            
+            self.rotation = 0.9 * self.rotation + 0.1 * self.rotation_to_target()
+        
 
     def draw(self, screen, x, y):
+        if self.state == InnerState.WALK or self.state == InnerState.DEAD:
+            x += (self.xdest - self.xmap) * self.grid.cell_size * self.tick_progress
+            y += (self.ydest - self.ymap) * self.grid.cell_size * self.tick_progress
         super().draw(screen, x, y)
 
         if self.state == InnerState.SHOOT and self.target is not None and self.can_shoot():
             pos1 = pygame.Vector2(self.rect.centerx, self.rect.centery)
             pos2 = pygame.Vector2(self.target.rect.centerx, self.target.rect.centery)
             dir = (pos2 - pos1).normalize()
-            self.bullet_progress = self.tick_progress * 2
+            self.bullet_progress = (self.tick_progress * 4) % 2 
             self.bullet_progress = 1 if self.bullet_progress > 1 else self.bullet_progress
             begin = pos1 +  dir * 23
             end = pos2 - dir * 11
@@ -144,24 +146,23 @@ class Unit(GameObject):
 
             pygame.draw.aaline(screen, (0, 0, 0), (p1.x, p1.y),
                                 (p2.x, p2.y))
-
-
+        
+            
 def neighbors_map(map, goal):
     def neighbors(unit):
         
         l = []
         
-        if True:
-            x, y = unit
+        x, y = unit
         
-            if x < (map.width-1) and (map.cases[x+1][y][1] is None or map.cases[x+1][y][1] == goal or not map.cases[x+1][y][1].collide):
-                l.append((x+1, y))
-            if x > 0 and (map.cases[x-1][y][1] is None or map.cases[x-1][y][1] == goal or not map.cases[x-1][y][1].collide):
-                l.append((x-1, y))
-            if y < (map.height-1) and (map.cases[x][y+1][1] is None or map.cases[x][y+1][1] == goal or not map.cases[x][y+1][1].collide):
-                l.append((x, y+1))
-            if y > 0 and (map.cases[x][y-1][1] is None or map.cases[x][y-1][1] == goal or not map.cases[x][y-1][1].collide):
-                l.append((x, y-1))
+        if x < (map.width-1) and (map.cases[x+1][y][UNIT_LAYER] is None or map.cases[x+1][y][UNIT_LAYER] == goal or not map.cases[x+1][y][UNIT_LAYER].collide):
+            l.append((x+1, y))
+        if x > 0 and (map.cases[x-1][y][UNIT_LAYER] is None or map.cases[x-1][y][UNIT_LAYER] == goal or not map.cases[x-1][y][UNIT_LAYER].collide):
+            l.append((x-1, y))
+        if y < (map.height-1) and (map.cases[x][y+1][UNIT_LAYER] is None or map.cases[x][y+1][UNIT_LAYER] == goal or not map.cases[x][y+1][UNIT_LAYER].collide):
+            l.append((x, y+1))
+        if y > 0 and (map.cases[x][y-1][UNIT_LAYER] is None or map.cases[x][y-1][UNIT_LAYER] == goal or not map.cases[x][y-1][UNIT_LAYER].collide):
+            l.append((x, y-1))
         return l
 
     return neighbors

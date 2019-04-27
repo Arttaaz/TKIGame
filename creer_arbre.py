@@ -16,7 +16,7 @@ def creer_unite_attaque(unit):
 
     ### Code de l'état Attaquer cible
     marcher_vers1 = Action('Marcher vers', unit.move, ["Cible courante"], None)
-    changer_etat2 = Action('Changer état', unit.set_tree_state, ['Attaquer cible'], None)
+    changer_etat2 = Action('Changer état', unit.set_tree_state, ['Idle'], None)
 
     est_mort1 = Action('Est mort', unit.is_dead, ["Cible courante"], {"Oui" : changer_etat2})
     attaquer1 = Action('Attaquer', unit.shoot, ["Cible courante"], est_mort1)

@@ -57,7 +57,9 @@ class Map:
         return random.choice(l)
     
     def closest_unit(self, unit, ally = False):
-        l = [_ for _ in self.units if _.team is not unit.team and _.state is not InnerState.DEAD]
+        l = [_ for _ in self.units if _.team is not unit.team
+             and _.state != InnerState.DEAD]
+        
         if len(l) == 0:
             return None
 
@@ -121,7 +123,7 @@ class Map:
         elif id in range(2, 4):
             game_object = Unit(pygame.image.load('assets/' + str(id) + '.png'), self, x, y, id)
             self.units.append(game_object)
-        elif id in range(4, 7):
+        elif id in range(4, 10):
             game_object = GameObject(pygame.image.load('assets/' + str(id) + '.png'), self,  x, y, id, True)
         else:
             game_object = GameObject(pygame.image.load('assets/' + str(id) + '.png'), self,  x, y, id, False)
