@@ -33,13 +33,15 @@ class Unit(GameObject):
 
     def move(self, param):
         if not self.can_shoot():
-            path = list(astar.find_path(self.grid.coord_of(self, 1), self.grid.coord_of(self.target, 1), neighbors_fnct=neighbors_map(self.grid, self.target), heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist))
-            x0, y0 = self.grid.coord_of(self, 1)
-            x1, y1 = path[1]
-            self.grid.cases[x0][y0][1] = None
-            self.grid.cases[x1][y1][1] = self
-            self.xmap = x1
-            self.ymap = y1
+            path = astar.find_path(self.grid.coord_of(self, 1), self.grid.coord_of(self.target, 1), neighbors_fnct=neighbors_map(self.grid, self.target), heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist)
+            if path is not None:
+                path = list(path)
+                x0, y0 = self.grid.coord_of(self, 1)
+                x1, y1 = path[1]
+                self.grid.cases[x0][y0][1] = None
+                self.grid.cases[x1][y1][1] = self
+                self.xmap = x1
+                self.ymap = y1
 
     def set_inner_state(self, state):
         print("set state" + str(state))
@@ -67,8 +69,8 @@ class Unit(GameObject):
             return "Oui"
         else:
             return "Non"
-        
-        
+
+
     def can_shoot(self):
 
         if self.target is not None and dist((self.xmap, self.ymap), (self.target.xmap, self.target.ymap)) <= 3: # TODO: change 3 to range
@@ -79,6 +81,7 @@ class Unit(GameObject):
     def update(self, map):
 
         self.bullet_progress += 1 / 60 / (bullet_time)
+
         if self.target is None:
             self.target = map.closest_unit(self)
 
