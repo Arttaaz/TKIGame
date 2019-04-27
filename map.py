@@ -10,7 +10,7 @@ class Map:
     def __init__(self, cell_size, width = 0, height = 0, depth = 0, path = None):
         self.cell_size = cell_size
         if path is not None:
-            self.width, self.height, self.depth, self.cases, self.units = read_file(path)
+            self.read_file(path)
         else:
             self.cases = [[[None for k in depth] for j in range(height)] for i in range(width)]
             self.width = width
@@ -88,52 +88,50 @@ class Map:
         return None
 
 
-def generate_object(id):
-    if id == 0:
-        game_object = None
-    elif id == 2:
-        game_object = Unit(pygame.image.load('assets/' + str(id) + '.png'), id)
-    else:
-        game_object = GameObject(pygame.image.load('assets/' + str(id) + '.png'), id, False)
+    def generate_object(self, id):
+        if id == 0:
+            game_object = None
+        elif id == 2:
+            game_object = Unit(pygame.image.load('assets/' + str(id) + '.png'), self, id)
+        else:
+            game_object = GameObject(pygame.image.load('assets/' + str(id) + '.png'), self, id, False)
 
-    return game_object
-def read_cases(content, width, height, depth):
-    objects = (generate_object(int(c)) for line in content for c in line.split())
-    cases = [[[None for k in range(depth)] for j in range(height)] for i in range(width)]
-    units = []
-    for k in range(depth):
-        for j in range(height):
-            for i in range(width):
-                object = next(objects)
-                if isinstance(object, Unit):
-                    units.append(object)
-                cases[i][j][k] = object
-    return cases, units
+        return game_object
+    def read_cases(self, content):
+        objects = (self.generate_object(int(c)) for line in content for c in line.split())
+        self.cases = [[[None for k in range(self.depth)] for j in range(self.height)] for i in range(self.width)]
+        self.units = []
+        for k in range(self.depth):
+            for j in range(self.height):
+                for i in range(self.width):
+                    object = next(objects)
+                    if isinstance(object, Unit):
+                        self.units.append(object)
+                    self.cases[i][j][k] = object
 
-def write_file(path, map):
-    f = open(path, 'w')
-    f.write(str(map.width))
-    f.write('\n')
-    f.write(str(map.height))
-    f.write('\n')
-    f.write(str(map.depth))
-    f.write('\n')
-    for k in range(map.depth):
-        for j in range(map.height):
-            f.write(' '.join([str(map.id(i, j, k)) for i in range(map.width)]))
-            f.write('\n')
+    def write_file(self, path):
+        f = open(path, 'w')
+        f.write(str(self.width))
         f.write('\n')
-def read_file(path):
-    f = open(path, 'r')
-    lines = iter(f.readlines())
+        f.write(str(self.height))
+        f.write('\n')
+        f.write(str(self.depth))
+        f.write('\n')
+        for k in range(self.depth):
+            for j in range(self.height):
+                f.write(' '.join([str(self.id(i, j, k)) for i in range(self.width)]))
+                f.write('\n')
+            f.write('\n')
+    def read_file(self, path):
+        f = open(path, 'r')
+        lines = iter(f.readlines())
 
-    width = int(next(lines))
-    height = int(next(lines))
-    depth = int(next(lines))
-    cases, units = read_cases(lines, width, height, depth)
+        self.width = int(next(lines))
+        self.height = int(next(lines))
+        self.depth = int(next(lines))
+        self.read_cases(lines)
 
-    if len(cases) != width or len(cases[0]) != height:
-        print("Erreur dans les dimensions de la map chargée")
-    f.close()
+        if len(self.cases) != self.width or len(self.cases[0]) != self.height:
+            print("Erreur dans les dimensions de la map chargée")
+        f.close()
 
-    return width, height, depth, cases, units

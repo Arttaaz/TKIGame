@@ -1,6 +1,6 @@
 import sys, pygame
 from unit import Unit
-from map import Map, write_file, generate_object
+from map import Map
 pygame.init()
 
 size = width, height = 800, 800
@@ -22,7 +22,7 @@ while 1:
             print(event.key)
             if event.key == pygame.K_s:
                 print(event.key)
-                write_file(path, map)
+                map.write_file(path)
             if event.key == pygame.K_l:
                 map = Map(30, path = path)
             if event.key == pygame.K_RIGHT:
@@ -42,7 +42,7 @@ while 1:
             elif event.button == 1:
                 id += 1
                 
-            map.cases[map_pos_x][map_pos_y][layer] = generate_object(id)
+            map.cases[map_pos_x][map_pos_y][layer] = map.generate_object(id)
 
 
 
