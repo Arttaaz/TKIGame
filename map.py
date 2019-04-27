@@ -80,10 +80,10 @@ class Map:
         return False
 
 
-    def coord_of(self, gameObject, layer):
+    def coord_of(self, gameObject, depth):
         for x in range(0, self.width):
             for y in range(0, self.height):
-                if case[layer][x][y] = gameObject:
+                if case[x][y][depth] == gameObject:
                     return (x, y)
         return None
 
