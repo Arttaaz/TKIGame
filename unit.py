@@ -33,15 +33,14 @@ class Unit(GameObject):
 
     def move(self, param):
         if not self.can_shoot():
-            path = astar.find_path(self.grid.coord_of(self, 1), self.grid.coord_of(self.target, 1), neighbors_fnct=neighbors_map(self.grid, self.target), heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist)
+            path = astar.find_path((self.xmap, self.ymap), (self.target.xmap, self.target.ymap), neighbors_fnct=neighbors_map(self.grid, self.target), heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist)
             if path is not None:
                 path = list(path)
-                x0, y0 = self.grid.coord_of(self, 1)
-                x1, y1 = path[1]
-                self.grid.cases[x0][y0][1] = None
-                self.grid.cases[x1][y1][1] = self
-                self.xmap = x1
-                self.ymap = y1
+                x, y = path[1]
+                self.grid.cases[self.xmap][self.ymap][1] = None
+                self.grid.cases[x][y][1] = self
+                self.xmap = x
+                self.ymap = y
 
     def set_inner_state(self, state):
         print("set state" + str(state))
@@ -98,7 +97,7 @@ class Unit(GameObject):
         if self.bullet_progress > 1:
             self.bullet_progress = 0
             self.arbre.eval()
-        
+
         if self.hp < 0:
             self.state = InnerState.DEAD
             self.rotation += 1
