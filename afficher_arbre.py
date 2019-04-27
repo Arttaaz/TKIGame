@@ -12,12 +12,13 @@ from dimensions import *
 
 
 PADDING_ARBRE_HAUT = 8
-PADDING_ARBRE_COTES = 20
+PADDING_ARBRE_COTES = 15
 TAILLE_FONT_NOM = 40
 TAILLE_FONT_ATTRIBUTS = 20
 TAILLE_FONT_PARAMS = 15
 TAILLE_FONT_CONDITIONS = 10
 DECALAGE_ATTRIBUTS_HAUTEUR = 100 # distance entre deux attributs alignés
+WIDTH_LIGNES = 3
 
 
 class AfficherArbre:
@@ -31,8 +32,8 @@ class AfficherArbre:
         self.screen = screen
 
         self.background_arbre = pygame.image.load('assets/arbre/background_arbre.jpeg').convert()
-        self.background_etat = pygame.image.load('assets/arbre/background_etat.jpeg').convert()
-        self.background_action = pygame.image.load('assets/arbre/background_action.jpeg').convert()
+        self.background_etat = pygame.image.load('assets/arbre/background_etat.jpg').convert()
+        self.background_action = pygame.image.load('assets/arbre/background_action.jpg').convert()
         self.background_params = pygame.image.load('assets/arbre/background_parametres.jpg').convert()
 
         pygame.font.init() # initialise le module font
@@ -54,7 +55,7 @@ class AfficherArbre:
 
         Le 'Rect' dans le dico est représenté par un tuple (x, y, width, height).
         Si l'attribut du 'Rect' est une 'Action' ou un 'Etat', ajoute tel quel l'attribut au dico.
-        Si le 'Rect' représente une ligne, alors associe au 'Rect' un tableau [Attribut départ, Attribut arrivée, condition entre les deux].
+        Si le 'Rect' représente une ligne, alors associe au 'Rect' un tableau [Attribut départ, Attribut arrivée, condition entre les deux, pos_debut_fleche, pos_fin_fleche].
         """
         ### Initialisations
         dico_rect = {} # Dictionnaire associant un rect à sont attribut
@@ -82,7 +83,7 @@ class AfficherArbre:
             self.screen.blit(text, coords_text)
             milieu_action = self.afficher_action(etat.action_associee, (coord_etat[0], coord_etat[1]+DECALAGE_ATTRIBUTS_HAUTEUR), pas_etat, dico_rect)
 
-            rect_line = pygame.draw.aaline(self.screen, self.couleur_fleche, fin_coords_etat, milieu_action)
+            rect_line = pygame.draw.line(self.screen, self.couleur_fleche, fin_coords_etat, milieu_action, WIDTH_LIGNES)
 
             coord_etat = (coord_etat[0]+pas_etat, coord_etat[1])
             coords_debut_etat.append((fin_coords_etat[0], coords[1]))
@@ -91,7 +92,7 @@ class AfficherArbre:
         self.screen.blit(text_nom, coord_nom_arbre)
         fin_coords_nom_arbre = (coord_nom_arbre[0]+text_nom.get_rect().width//2, coord_nom_arbre[1]+text_nom.get_rect().height)
         for coords in coords_debut_etat:
-            pygame.draw.aaline(self.screen, self.couleur_fleche, fin_coords_nom_arbre, coords)
+            pygame.draw.line(self.screen, self.couleur_fleche, fin_coords_nom_arbre, coords, WIDTH_LIGNES)
 
         return dico_rect
         
@@ -110,12 +111,12 @@ class AfficherArbre:
         text = self.font_action.render(action.nom, True, (0, 0, 0))
         coords = centrer_coords_longueur(coord_action, place_dispo_largeur, background_action_rect.width)
         coords_text = centrer_objet(coords, (text.get_rect().width, text.get_rect().height), (background_action_rect.width, background_action_rect.height))
+        coords_fin_action = (coord_action[0] + place_dispo_largeur//2, coord_action[1]+background_action_rect.height)
         self.screen.blit(self.background_action, coords)
         self.screen.blit(text, coords_text)
 
         ### Affiche les paramètres
-        coords_fin_action = (coord_action[0] + place_dispo_largeur//2, coord_action[1]+background_action_rect.height)
-        coords_params = (coords_fin_action[0], coords_fin_action[1])
+        coords_params = (coords[0]+background_action_rect.width, coords[1])
         params = action.params_action_associee
         if params is not None:
             for p in params:
@@ -132,15 +133,15 @@ class AfficherArbre:
         if action.list_actions_suivantes is None:
             return (coords[0]+background_action_rect.width//2, coords[1])# il n'y a aucunes actions qui découlent de l'action courante
 
-        ### Affiche les actions suivantes et trace des flèches vertes entre cette action et les actions suivantes ainsi que les conditions potentielles
+        ### Affiche les actions suivantes et trace des flèches verte entre cette action et les actions suivantes ainsi que les conditions potentielles
         if type(action.list_actions_suivantes) != type({}):
             action.list_actions_suivantes = {None : action.list_actions_suivantes} # le passe en mode dico pour simplifier le traitement
         pas_action = place_dispo_largeur // len(action.list_actions_suivantes.keys())
 
         for val_action in action.list_actions_suivantes: # list_actions_suivantes est un dico !
             milieu_coords = self.afficher_action(action.list_actions_suivantes[val_action], (coord_action[0], coord_action[1]+DECALAGE_ATTRIBUTS_HAUTEUR), pas_action, dico_rect)
-            rect_line = pygame.draw.aaline(self.screen, self.couleur_fleche, coords_fin_action, milieu_coords)
-            dico_rect[(rect_line.left, rect_line.top, rect_line.width, rect_line.height)] = [action, action.list_actions_suivantes[val_action], val_action]
+            rect_line = pygame.draw.line(self.screen, self.couleur_fleche, coords_fin_action, milieu_coords, WIDTH_LIGNES)
+            dico_rect[(rect_line.left, rect_line.top, rect_line.width, rect_line.height)] = [action, action.list_actions_suivantes[val_action], val_action, coords_fin_action, milieu_coords]
 
             if val_action is not None: # cas où il y a de condition
                 text = self.font_conditions.render(str(val_action), True, (0, 0, 0))
@@ -166,6 +167,9 @@ def centrer_objet(coord_initial, taille_objet, place_reservee):
     Retourne les coordonnées qui centrent l'objet dans la place réservée.
     """
     return (coord_initial[0] + (place_reservee[0]-taille_objet[0])//2, coord_initial[1] + (place_reservee[1]-taille_objet[1])//2)
+
+def adapter_taille_font():
+    pass
 
 
 if __name__ == "__main__":
