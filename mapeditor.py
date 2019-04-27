@@ -42,7 +42,7 @@ while 1:
             elif event.button == 1:
                 id += 1
                 
-            map.cases[map_pos_x][map_pos_y][layer] = map.generate_object(id)
+            map.cases[map_pos_x][map_pos_y][layer] = map.generate_object(id, map_pos_x, map_pos_y)
 
 
 

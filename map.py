@@ -3,8 +3,9 @@
 A map.
 """
 from gameobject import GameObject
-from unit import Unit
+from unit import Unit, dist, State
 import pygame
+import random
 class Map:
 
     def __init__(self, cell_size, width = 0, height = 0, depth = 0, path = None):
@@ -48,7 +49,19 @@ class Map:
         self.width = width
         self.height = height
         self.depth = depth
+    def random_unit(self, omit):
+        l = [_ for _ in self.units if _.team is not omit.team and _.state is not State.DEAD]
+        if len(l) == 0:
+            return None
+        
+        return random.choice(l)
+    
+    def closest_unit(self, unit):
+        l = [_ for _ in self.units if _.team is not unit.team and _.state is not State.DEAD]
+        if len(l) == 0:
+            return None
 
+        return min(l, key = lambda u : dist(u, unit))
     """
     Transformer une coordonnee world en coordonnee map
     """
@@ -83,30 +96,34 @@ class Map:
     def coord_of(self, gameObject, depth):
         for x in range(0, self.width):
             for y in range(0, self.height):
-                if case[x][y][depth] == gameObject:
+                if self.cases[x][y][depth] == gameObject:
                     return (x, y)
         return None
 
 
-    def generate_object(self, id):
+    def generate_object(self, id, x, y):
         if id == 0:
             game_object = None
         elif id == 2:
-            game_object = Unit(pygame.image.load('assets/' + str(id) + '.png'), self, id)
+            game_object = Unit(pygame.image.load('assets/' + str(id) + '.png'), self, x, y, id)
+            self.units.append(game_object)
+        elif id in range(4, 7):
+            game_object = GameObject(pygame.image.load('assets/' + str(id) + '.png'), self,  x, y, id, True)
         else:
-            game_object = GameObject(pygame.image.load('assets/' + str(id) + '.png'), self, id, False)
+            game_object = GameObject(pygame.image.load('assets/' + str(id) + '.png'), self,  x, y, id, False)
 
         return game_object
     def read_cases(self, content):
-        objects = (self.generate_object(int(c)) for line in content for c in line.split())
+        objects = (self.generate_object(int(c), 0, 0) for line in content for c in line.split())
         self.cases = [[[None for k in range(self.depth)] for j in range(self.height)] for i in range(self.width)]
         self.units = []
         for k in range(self.depth):
             for j in range(self.height):
                 for i in range(self.width):
                     object = next(objects)
-                    if isinstance(object, Unit):
-                        self.units.append(object)
+                    if object is not None:
+                        object.xmap = i
+                        object.ymap = j
                     self.cases[i][j][k] = object
 
     def write_file(self, path):

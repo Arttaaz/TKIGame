@@ -13,10 +13,13 @@ class State(Enum):
 bullet_time = 0.3
 
 class Unit(GameObject):
-    def __init__(self, image, grid, id = 1, collide = True):
-        GameObject.__init__(self, image, grid, id, collide)
+    def __init__(self, image, grid, xmap, ymap, id = 1, collide = True, team = 1):
+        GameObject.__init__(self, image, grid, xmap, ymap, id, collide)
         self.state = State.SHOOT
         self.target = None
+        self.xmap = xmap
+        self.ymap = ymap
+        self.team = team
         self.hp = 100
         self.bullet_progress = 0
         self.start_shooting_time = 0
@@ -46,8 +49,8 @@ class Unit(GameObject):
 
     def update(self, map):
 
-        if map.units[0] != self:
-            self.target = map.units[0]
+        if self.target is None:
+            self.target = map.closest_unit(self)
 
         if self.state == State.SHOOT and self.target is not None:
             self.rotation = 0.9 * self.rotation + 0.1 * self.rotation_to_target()
@@ -56,6 +59,8 @@ class Unit(GameObject):
             if self.bullet_progress > 1:
                 self.bullet_progress = 0
                 self.target.hp -= 10
+                self.target = map.closest_unit(self)
+
         if self.hp < 0:
             self.state = State.DEAD
             self.rotation += 1
@@ -95,6 +100,6 @@ def cost(n, goal):
     return 1
 
 def dist(u0, u1):
-    x0, y0 = u0.grid.coord_of(u0, 1)
-    x1, y1 = u1.grid.coord_of(u1, 1)
+    x0, y0 = u0.xmap, u0.ymap
+    x1, y1 = u1.xmap, u1.ymap
     return ((x1 - x0)**2 + (y1 - y0)**2)**0.5

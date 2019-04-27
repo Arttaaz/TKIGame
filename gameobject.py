@@ -1,9 +1,11 @@
 import pygame
 class GameObject:
 
-    def __init__(self, image, grid, id = 0,  collide=False):
+    def __init__(self, image, grid, xmap, ymap, id = 0,  collide=False):
         self.image = image
         self.grid = grid
+        self.xmap = xmap
+        self.ymap = ymap
         self.collide = collide
         self.rotation = 0
         self.rect = image.get_rect()
