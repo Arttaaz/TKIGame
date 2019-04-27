@@ -9,7 +9,7 @@ Tout ceci est géré par un objet 'Modification'.
 
 import pygame
 
-from afficher_arbre import centrer_coords
+from afficher_arbre import centrer_coords_longueur
 
 class Modification:
     """

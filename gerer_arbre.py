@@ -8,7 +8,7 @@ Module gérant les fonctionnalités suivantes:
 import pygame
 import sys
 
-from afficher_arbre import AfficherArbre
+from afficher_arbre import AfficherArbre, centrer_objet
 from modifier_arbre import Modification
 from dimensions import *
 
@@ -117,11 +117,12 @@ class GererArbre:
                 m.effectuer_modification()
 
 
-def centrer_objet(coord_initial, taille_objet, place_reservee):
-    """
-    Retourne les coordonnées qui centrent l'objet dans la place réservée.
-    """
-    return (coord_initial[0] + (place_reservee[0]-taille_objet[0])//2, coord_initial[1] + (place_reservee[1]-taille_objet[1])//2)
+    def gerer_click(self, obj_click):
+        """
+        Assume que l'objet sur lequel on a clické n'est pas None.
+        Effectue les actions associé au clic.
+        """
+        pass
 
 
 def has_clicked_on_rect(dico_rect, event):
@@ -137,13 +138,9 @@ def has_clicked_on_rect(dico_rect, event):
 
 if __name__ == "__main__":
     from arbre import *
+    from creer_arbre import *
 
-    marcher_vers = Action('marcher_vers', action_inutile, None, None)
-    attaquer = Action('attaquer', action_inutile, None, None)
-    decider_quelque_chose = Action('decider_quelque_chose', action_inutile, None, [marcher_vers, attaquer])
-    idle = Etat(marcher_vers, 'Idle')
-    faire_quelque_chose = Etat(decider_quelque_chose, 'Faire quelque chose')
-    arbre = Arbre([idle, faire_quelque_chose], idle)
+    arbre = creer_unite_attaque()
 
     screen = pygame.display.set_mode((1180, 640))
     background = pygame.image.load('assets/background.jpg').convert(screen)
