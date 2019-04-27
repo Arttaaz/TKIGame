@@ -6,7 +6,7 @@ from gameobject import GameObject
 from unit import Unit
 import pygame
 class Map:
-    
+
     def __init__(self, cell_size, width = 0, height = 0, depth = 0, path = None):
         self.cell_size = cell_size
         if path is not None:
@@ -38,7 +38,7 @@ class Map:
             height = self.height
         if depth is None:
             depth = self.depth
-           
+
         new_cases = [[[None for k in range(depth)] for j in range(height)] for i in range(width)]
         for k in range(self.depth):
             for i in range(self.width):
@@ -48,7 +48,7 @@ class Map:
         self.width = width
         self.height = height
         self.depth = depth
-        
+
     """
     Transformer une coordonnee world en coordonnee map
     """
@@ -64,7 +64,7 @@ class Map:
         return x * self.cell_size + self.cell_size / 2 - self.cell_size * (self.width - 1) / 2
     def map_to_world_y(self, x):
         return y * self.cell_size + self.cell_size / 2 - self.cell_size * (self.height - 1) / 2
-    
+
 
     def id(self, x, y, z):
         object = self.cases[x][y][z]
@@ -78,7 +78,15 @@ class Map:
                 return True
 
         return False
-        
+
+
+    def coord_of(self, gameObject, depth):
+        for x in range(0, self.width):
+            for y in range(0, self.height):
+                if case[x][y][depth] == gameObject:
+                    return (x, y)
+        return None
+
 
 def generate_object(id):
     if id == 0:
@@ -87,11 +95,11 @@ def generate_object(id):
         game_object = Unit(pygame.image.load('assets/' + str(id) + '.png'), id)
     else:
         game_object = GameObject(pygame.image.load('assets/' + str(id) + '.png'), id, False)
-        
+
     return game_object
 def read_cases(content, width, height, depth):
     objects = (generate_object(int(c)) for line in content for c in line.split())
-    cases = [[[None for k in range(depth)] for j in range(height)] for i in range(width)] 
+    cases = [[[None for k in range(depth)] for j in range(height)] for i in range(width)]
     units = []
     for k in range(depth):
         for j in range(height):
@@ -118,14 +126,14 @@ def write_file(path, map):
 def read_file(path):
     f = open(path, 'r')
     lines = iter(f.readlines())
-        
+
     width = int(next(lines))
     height = int(next(lines))
     depth = int(next(lines))
-    cases, units = read_cases(lines, width, height, depth) 
+    cases, units = read_cases(lines, width, height, depth)
 
     if len(cases) != width or len(cases[0]) != height:
         print("Erreur dans les dimensions de la map chargée")
     f.close()
-        
+
     return width, height, depth, cases, units
