@@ -9,6 +9,7 @@ Tout ceci est géré par un objet 'Modification'.
 
 import pygame
 
+from arbre import Etat
 from afficher_arbre import centrer_coords_longueur, centrer_objet, TAILLE_FONT_CONDITIONS, WIDTH_LIGNES
 
 class Modification:
@@ -51,6 +52,10 @@ class Modification:
         """
         Enregistre la modification sur l'arbre.
         """
+        if type(self.attribut_depart) is type(Etat): # Cas où on modifie le cablâge d'un état
+            self.attribut_depart.action_associee = self.attribut_fin
+            return
+
         if self.condition is None:
             self.attribut_depart.list_actions_suivantes = self.attribut_fin
         else:

@@ -10,6 +10,7 @@ import sys
 
 from afficher_arbre import AfficherArbre, centrer_objet
 from modifier_arbre import Modification
+from arbre import Action
 from dimensions import *
 from map import Map
 from unit import Unit
@@ -145,7 +146,7 @@ class GererArbre:
                 self.gerer_nouveau_modif(Modification(attr_a_modifier, ancien_attr, attr_souhaite, debut_ligne, ancien_fin_ligne, fin_ligne, self.afficher_arbre.font_params, self.ligne_selectionnee[0][2]))
                 self.ligne_selectionnee = None
             elif self.attr_selectionne is None: # premier attribut qu'on sélectionne et on a pas sélectionner une ligne
-                if obj_click[0].list_actions_suivantes is None: # il est possible de sélectionner uniquement un attribut qui est en fin d'arbre
+                if type(obj_click) is type(Action) and obj_click[0].list_actions_suivantes is None or obj_click[0].action_associee is None: # il est possible de sélectionner uniquement un attribut qui est en fin d'arbre
                     self.attr_selectionne = obj_click
             else: # dessine la modification proposée
                 attr_a_modifier, attr_souhaite = self.attr_selectionne[0], obj_click[0]
@@ -196,9 +197,12 @@ if __name__ == "__main__":
     from arbre import *
     from creer_arbre import *
 
-    map = Map(64, path = "assets/map.map")
-    
-    arbre = creer_unite_attaque(Unit(pygame.image.load('assets/1.png'), "assets/1.png", map, 0, 0))
+    marcher_vers = Action('marcher_vers', action_inutile, ["Coucou"], None)
+    attaquer = Action('attaquer', action_inutile, [9], None)
+    decider_quelque_chose = Action('decider_quelque_chose', action_inutile, None, {"Oui" : marcher_vers, "Non" : attaquer})
+    idle = Etat(marcher_vers, 'Idle')
+    faire_quelque_chose = Etat(decider_quelque_chose, 'Faire quelque chose')
+    arbre = Arbre([idle, faire_quelque_chose], idle)
 
     screen = pygame.display.set_mode((1180, 640))
     background = pygame.image.load('assets/background.jpg').convert(screen)
