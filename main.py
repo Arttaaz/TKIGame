@@ -12,7 +12,6 @@ clock = pygame.time.Clock()
 screen = pygame.display.set_mode(size)
 path = "assets/map.map"
 map = Map(64, path=path, depth=1)
-GSStack = [GameState.BEFORE_SIMU] # TODO: change to menu later when menu exists
 
 while 1:
     clock.tick(60)
