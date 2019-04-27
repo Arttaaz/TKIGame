@@ -1,7 +1,7 @@
 import pygame, sys
 from enum import Enum
 from gerer_arbre import GererArbre
-
+from unit import UNIT_LAYER
 class GameState(Enum):
     MENU            = 0
     BEFORE_SIMU     = 1
@@ -43,8 +43,8 @@ class State:
                     if event.button == 1:
                         map_pos_x, map_pos_y = (self.map.world_to_map_x(int(event.pos[0] - self.screen.get_width() / 2)),
                                        self.map.world_to_map_y(int(event.pos[1] - self.screen.get_height() / 2)))
-                        if self.map.cases[map_pos_x][map_pos_y][1] is not None:
-                            self.tree = GererArbre(self.screen, self.map.cases[map_pos_x][map_pos_y][1].arbre)
+                        if self.map.cases[map_pos_x][map_pos_y][UNIT_LAYER] is not None:
+                            self.tree = GererArbre(self.screen, self.map.cases[map_pos_x][map_pos_y][UNIT_LAYER].arbre)
                             self.tree.boucle_principale()
 
                     elif event.button == 3:

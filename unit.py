@@ -45,8 +45,6 @@ class Unit(GameObject):
             if path is not None:
                 path = list(path)
                 x, y = path[1]
-                self.grid.cases[self.xmap][self.ymap][1] = None
-                self.grid.cases[x][y][1] = self
                 self.state = InnerState.WALK
                 self.xdest = x
                 self.ydest = y
