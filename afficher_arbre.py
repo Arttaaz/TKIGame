@@ -33,10 +33,10 @@ class AfficherArbre:
         self.arbre = arbre
         self.screen = screen
 
-        self.background_arbre = pygame.image.load('assets/arbre/background_arbre.jpeg').convert()
-        self.background_etat = pygame.image.load('assets/arbre/background_etat.jpg').convert()
-        self.background_action = pygame.image.load('assets/arbre/background_action.jpg').convert()
-        self.background_params = pygame.image.load('assets/arbre/background_parametres.jpg').convert()
+        self.background_arbre = pygame.image.load('assets/arbre/background_arbre.png').convert()
+        self.background_etat = pygame.image.load('assets/arbre/background_etat.png').convert()
+        self.background_action = pygame.image.load('assets/arbre/background_action.png').convert()
+        self.background_params = pygame.image.load('assets/arbre/background_parametre.png').convert()
 
         pygame.font.init() # initialise le module font
         self.font_etat = pygame.font.SysFont(pygame.font.get_default_font(), TAILLE_FONT_ATTRIBUTS, bold=True)
@@ -144,7 +144,6 @@ class AfficherArbre:
         for val_action in action.list_actions_suivantes:
             rect = is_action_already_blitten(action.list_actions_suivantes[val_action], dico_rect) # est-ce que l'action existe ?
             if rect is None:
-                print(val_action)
                 actions_a_afficher.append(val_action) # il faut tracer cette action
                 continue
 
