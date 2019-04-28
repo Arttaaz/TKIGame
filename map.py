@@ -2,14 +2,17 @@
 """
 A map.
 """
+
 from gameobject import GameObject
 from unit import Unit, dist, InnerState
 import pygame
 import random
+
 class Map:
 
     def __init__(self, cell_size, width = 0, height = 0, depth = 0, path = None):
         self.cell_size = cell_size
+        self.surf = None
         if path is not None:
             self.read_file(path)
         else:
@@ -25,13 +28,18 @@ class Map:
                     if self.cases[i][j][k] is not None:
                         self.cases[i][j][k].update(self)
     def draw(self, screen, x, y):
+        if self.surf is None:
+            self.surf = pygame.Surface((screen.get_width(), screen.get_height()))
+        self.surf.fill((0, 0, 0))
         x -= self.cell_size * (self.width - 1) / 2
         y -= self.cell_size * (self.height - 1) / 2
         for k in range(self.depth):
             for i in range(self.width):
                 for j in range(self.height):
                     if self.cases[i][j][k] is not None:
-                        self.cases[i][j][k].draw(screen, x + i * self.cell_size, y + j * self.cell_size)
+                        self.cases[i][j][k].draw(self.surf, x + i * self.cell_size, y + j * self.cell_size)
+        
+        screen.blit(self.surf, (0, 0))
     def resize(self, width = None, height = None, depth = None):
         if width is None:
             width = self.width
@@ -91,7 +99,7 @@ class Map:
     """
     def map_to_world_x(self, x):
         return x * self.cell_size - self.cell_size * (self.width - 1) / 2
-    def map_to_world_y(self, x):
+    def map_to_world_y(self, y):
         return y * self.cell_size - self.cell_size * (self.height - 1) / 2
 
 
