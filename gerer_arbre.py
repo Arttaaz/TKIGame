@@ -100,12 +100,12 @@ class GererArbre:
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1: #clic gauche
-                obj_click = has_clicked_on_rect(self.dico_rect_attributs, event) # regarde d'abord si on a clické sur un attribut
-                if obj_click is not None: # on a clické sur un attribut
-                    self.gerer_click_arbre(obj_click)
-                obj_click = has_clicked_on_rect(self.dico_rect_boutons, event) # regarde si on a clické sur un bouton
-                if obj_click is not None: # on a clické sur un bouton
-                    self.gerer_click_bouton(obj_click)
+                obj_click_attr = has_clicked_on_rect(self.dico_rect_attributs, event) # regarde d'abord si on a clické sur un attribut
+                if obj_click_attr is not None: # on a clické sur un attribut
+                    self.gerer_click_arbre(obj_click_attr)
+                obj_click_bouton = has_clicked_on_rect(self.dico_rect_boutons, event) # regarde si on a clické sur un bouton
+                if obj_click_bouton is not None: # on a clické sur un bouton
+                    self.gerer_click_bouton(obj_click_bouton)
                 if obj_click_bouton is None and obj_click_attr is None: # on a clické dans le vide : réinit les sélections
                     self.attr_selectionne = None
                     self.ligne_selectionnee = None
