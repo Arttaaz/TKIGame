@@ -11,7 +11,7 @@ screen = pygame.display.set_mode(size)
 
 
 clock = pygame.time.Clock()
-path = "assets/tuto1.map"
+path = "assets/tuto2.map"
 map = Map(64, path = path)
 layer = 0
 while 1:

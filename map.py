@@ -57,29 +57,38 @@ class Map:
         self.width = width
         self.height = height
         self.depth = depth
-    def random_unit(self, omit):
-        l = [_ for _ in self.units if _.team is not omit.team and _.state is not InnerState.DEAD]
+    def random_unit(self, omit, my_team = False):
+        l = [_ for _ in self.units if (_.team is omit.team) == my_team and _.state is not InnerState.DEAD  and _ is not unit]
         if len(l) == 0:
             return None
 
         return random.choice(l)
 
-    def closest_unit(self, unit, ally = False):
-        l = [_ for _ in self.units if _.team is not unit.team
-             and _.state != InnerState.DEAD]
+    def closest_unit(self, unit, my_team = False):
+        l = [_ for _ in self.units if (_.team is unit.team) == my_team
+             and _.state != InnerState.DEAD and _ is not unit]
 
         if len(l) == 0:
             return None
 
         return min(l, key = lambda u : dist((u.xmap, u.ymap), (unit.xmap, unit.ymap)))
+    def farthest_unit(self, unit, my_team = False):
+        l = [_ for _ in self.units if (_.team is unit.team) == my_team
+             and _.state != InnerState.DEAD  and _ is not unit]
+
+        if len(l) == 0:
+            return None
+
+        return max(l, key = lambda u : dist((u.xmap, u.ymap), (unit.xmap, unit.ymap)))
+    
     def low_hp_unit(self, unit):
-        l = [_ for _ in self.units if _.team is not unit.team and _.state is not InnerState.DEAD]
+        l = [_ for _ in self.units if (_.team is unit.team) == my_team and _.state is not InnerState.DEAD  and _ is not unit]
         if len(l) == 0:
             return None
 
         return min(l, key = lambda u : u.hp)
     def high_hp_unit(self, unit):
-        l = [_ for _ in self.units if _.team is not unit.team and _.state is not InnerState.DEAD]
+        l = [_ for _ in self.units if (_.team is unit.team) == my_team and _.state is not InnerState.DEAD and _ is not unit]
         if len(l) == 0:
             return None
 
