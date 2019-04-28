@@ -20,7 +20,10 @@ TAILLE_FONT_CONDITIONS = 10
 TAILLE_FONT_MINIMUM = 4
 DECALAGE_ATTRIBUTS_HAUTEUR = 100 # distance entre deux attributs alignés
 WIDTH_LIGNES = 3
+WIDTH_LIGNES_BLOQUEES = 5
 LARGEUR_HIT_BOX_LIGNES_MINIMALE = 30
+COULEUR_FLECHE = (255, 0, 0)
+COULEUR_FLECHE_BLOQUEE = (128, 128, 128)
 
 
 class AfficherArbre:
@@ -84,8 +87,10 @@ class AfficherArbre:
             blit_text_properly(self.screen, etat.nom_etat, pygame.Rect(coords[0], coords[1], rect.width, rect.height), self.font_etat, TAILLE_FONT_ATTRIBUTS)
             milieu_action = self.afficher_action(etat.action_associee, (coord_etat[0], coord_etat[1]+DECALAGE_ATTRIBUTS_HAUTEUR), pas_etat, dico_rect)
 
-            rect_line = adapt_rect_line(pygame.draw.line(self.screen, self.couleur_fleche, fin_coords_etat, milieu_action, WIDTH_LIGNES))
-            dico_rect[(rect_line.left, rect_line.top, rect_line.width, rect_line.height)] = [etat, etat.action_associee, None, fin_coords_etat, milieu_action]
+            rect_line = dessiner_ligne(self.screen, fin_coords_etat, milieu_action, etat.liaison_modifiable)
+            if etat.liaison_modifiable:
+                rect_line = adapt_rect_line(rect_line)
+                dico_rect[(rect_line.left, rect_line.top, rect_line.width, rect_line.height)] = [etat, etat.action_associee, None, fin_coords_etat, milieu_action]
 
             coord_etat = (coord_etat[0]+pas_etat, coord_etat[1])
             coords_debut_etat.append((fin_coords_etat[0], coords[1]))
@@ -148,8 +153,10 @@ class AfficherArbre:
                 continue
 
             milieu_coords = (rect.left+rect.width//2, rect.top) # il faut quand même tracer la ligne qui va vers l'action
-            rect_line = adapt_rect_line(pygame.draw.line(self.screen, self.couleur_fleche, coords_fin_action, milieu_coords, WIDTH_LIGNES))
-            dico_rect[(rect_line.left, rect_line.top, rect_line.width, rect_line.height)] = [action, action.list_actions_suivantes[val_action], val_action, coords_fin_action, milieu_coords]
+            rect_line = dessiner_ligne(self.screen, coords_fin_action, milieu_coords, action.liaison_modifiable[val_action])
+            if action.liaison_modifiable[val_action]:
+                rect_line = adapt_rect_line(rect_line)
+                dico_rect[(rect_line.left, rect_line.top, rect_line.width, rect_line.height)] = [action, action.list_actions_suivantes[val_action], val_action, coords_fin_action, milieu_coords]
 
             if val_action is not None: # cas où il y a de condition
                 text = self.font_conditions.render(str(val_action), True, (0, 0, 0))
@@ -164,8 +171,10 @@ class AfficherArbre:
         pas_action = place_dispo_largeur // len(actions_a_afficher)
         for val_action in actions_a_afficher: # contient les clefs des actions à afficher
             milieu_coords = self.afficher_action(action.list_actions_suivantes[val_action], (coord_action[0], coord_action[1]+DECALAGE_ATTRIBUTS_HAUTEUR), pas_action, dico_rect)
-            rect_line = adapt_rect_line(pygame.draw.line(self.screen, self.couleur_fleche, coords_fin_action, milieu_coords, WIDTH_LIGNES))
-            dico_rect[(rect_line.left, rect_line.top, rect_line.width, rect_line.height)] = [action, action.list_actions_suivantes[val_action], val_action, coords_fin_action, milieu_coords]
+            rect_line = dessiner_ligne(self.screen, coords_fin_action, milieu_coords, action.liaison_modifiable[val_action])
+            if action.liaison_modifiable[val_action]:
+                rect_line = adapt_rect_line(rect_line)
+                dico_rect[(rect_line.left, rect_line.top, rect_line.width, rect_line.height)] = [action, action.list_actions_suivantes[val_action], val_action, coords_fin_action, milieu_coords]
 
             if val_action is not None: # cas où il y a de condition
                 text = self.font_conditions.render(str(val_action), True, (0, 0, 0))
@@ -247,6 +256,26 @@ def is_action_already_blitten(action, dict_rect):
         if dict_rect[rect] is action:
             return pygame.Rect(rect)
 
+def dessiner_ligne(screen, coord_debut_fleche, coord_fin_fleche, is_modifiable):
+    """
+    Dessine la ligne en vérifiant
+    si on trace une ligne
+    que l'on peut modifier ou alors
+    une ligne que l'on n'a pas le droit
+    de modifier.
+
+    Retourne le rect de la ligne.
+    """
+    if is_modifiable:
+        taille_line = WIDTH_LIGNES
+        couleur_fleche = COULEUR_FLECHE
+    else:
+        taille_line = WIDTH_LIGNES_BLOQUEES
+        couleur_fleche = COULEUR_FLECHE_BLOQUEE
+    rect_line = adapt_rect_line(pygame.draw.line(screen, couleur_fleche, coord_debut_fleche, coord_fin_fleche, taille_line))
+
+    return rect_line
+
 
 if __name__ == "__main__":
     from arbre import *
@@ -254,7 +283,7 @@ if __name__ == "__main__":
     marcher_vers = Action('marcher_vers', action_inutile, ["Coucou"], None)
     attaquer = Action('attaquer', action_inutile, [9], None)
     decider_quelque_chose = Action('decider_quelque_chose', action_inutile, None, {"Oui" : marcher_vers, "Non" : attaquer})
-    idle = Etat(marcher_vers, 'Idle')
+    idle = Etat(marcher_vers, False, 'Idle')
     faire_quelque_chose = Etat(decider_quelque_chose, 'Faire quelque chose')
     arbre = Arbre([idle, faire_quelque_chose], idle)
 
