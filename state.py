@@ -29,8 +29,8 @@ class State:
         self.clicking = False
         self.credits_offset = 0
 
-        self.levels = ["tuto1.map", "map1.map", "bersekrabvsvacanciers.map", "tuto2.map"]
-        self.level = 1
+        self.levels = ["tuto1.map", "bersekrabvsvacanciers.map", "map1.map", "tuto2.map"]
+        self.level = 0
         self.map = Map(64, path="assets/" + self.levels[self.level])
 
 
@@ -55,6 +55,8 @@ class State:
 
                 if result == JOUER:
                     self.state = [GameState.BEFORE_SIMU]
+                if result == CREDITS:
+                    self.state.append(GameState.CREDITS)
                 if result == QUITTER:
                     exit()
             if self.state[len(self.state)-1] == GameState.ARBRE:
@@ -136,8 +138,8 @@ class State:
 
                     pygame.draw.rect(self.screen, pygame.Color(255, 0, 0, 50), rect, 2)
 
-                rect2 = pygame.Rect(230, 10, 32, 32)
-                pygame.draw.rect(self.screen, pygame.Color(255, 255, 255, 0), rect2, 0)
+                img = pygame.image.load("assets/arrow2.png")
+                self.screen.blit(img, (230,10))
 
             if state == GameState.LEVEL_END:
                 font = pygame.font.SysFont(pygame.font.get_default_font(), 72, bold=True)
@@ -181,4 +183,5 @@ class State:
             if self.credits_offset < 640:
                 self.credits_offset += 20
             else:
+                self.credits_offset = 0
                 self.state.pop()

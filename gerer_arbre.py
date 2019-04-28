@@ -42,7 +42,7 @@ class GererArbre:
 
         self.quitter = False
         self.sauvegarder = False
-        
+
         self.image_boutons = {}
         for img_n in nom_boutons:
             for img_e in etats_bouton:
@@ -51,7 +51,7 @@ class GererArbre:
         self.etat_boutons = {}
         for nom in nom_boutons:
             self.etat_boutons[nom] = "idle"
-        
+
         self.dico_rect_attributs = self.afficher_arbre.afficher_arbre()
         self.afficher_UI()
 
@@ -289,8 +289,8 @@ if __name__ == "__main__":
 
     marcher_vers = Action('marcher_vers', action_inutile, ["Coucou"], None)
     attaquer = Action('attaquer', action_inutile, [9], None)
-    decider_quelque_chose = Action('decider_quelque_chose', action_inutile, None, {"Oui" : marcher_vers, "Non" : attaquer})
-    idle = Etat(marcher_vers, 'Idle')
+    decider_quelque_chose = Action('decider_quelque_chose', action_inutile, None, {"Oui" : marcher_vers, "Non" : attaquer}, {"Oui" : True, "Non" : False})
+    idle = Etat(marcher_vers, False, 'Idle')
     faire_quelque_chose = Etat(decider_quelque_chose, 'Faire quelque chose')
     arbre = Arbre([idle, faire_quelque_chose], idle)
 
