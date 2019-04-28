@@ -38,7 +38,7 @@ class Map:
                 for j in range(self.height):
                     if self.cases[i][j][k] is not None:
                         self.cases[i][j][k].draw(self.surf, x + i * self.cell_size, y + j * self.cell_size)
-        
+
         screen.blit(self.surf, (0, 0))
     def resize(self, width = None, height = None, depth = None):
         if width is None:
@@ -67,7 +67,7 @@ class Map:
     def closest_unit(self, unit, ally = False):
         l = [_ for _ in self.units if _.team is not unit.team
              and _.state != InnerState.DEAD]
-        
+
         if len(l) == 0:
             return None
 
@@ -116,7 +116,7 @@ class Map:
             return 0
         else:
             return object.behaviour
-        
+
     def collide(self, x, y):
         for case in self.cases[x][y]:
             if case.collide:

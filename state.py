@@ -1,28 +1,35 @@
 import pygame, sys
 from enum import Enum
+from map import Map
 from gerer_arbre import GererArbre
 from unit import UNIT_LAYER, Unit
 from menu import Menu, JOUER, QUITTER, CREDITS
+from afficher_arbre import blit_text_properly
+
 class GameState(Enum):
     MENU            = 0
     BEFORE_SIMU     = 1
     SIMU            = 2
     ARBRE           = 3
+    LEVEL_END       = 4
 
 clock = pygame.time.Clock()
 black = 0, 0, 0
 
 # Current game state is always last element of self.state
 class State:
-    def __init__(self, screen, map):
+    def __init__(self, screen):
         self.state  = [GameState.MENU] # TODO: change to MENU when menu exists
         self.screen = screen
         self.menu = Menu()
         self.arbre_surface = pygame.Surface((screen.get_width(), screen.get_height()))  # the size of your rect
-        self.map    = map
         self.modifs_arbres = {}
         self.select_pos = None
         self.clicking = False
+        self.levels = ["tuto1.map", "map.map"]
+        self.level = 0
+        self.map = Map(64, path="assets/" + self.levels[self.level])
+
 
     # Add state to the stack when creating new state
     # pop state from the stackif leaving state
@@ -82,6 +89,18 @@ class State:
                                 modif.effectuer_modification()
                         self.state.append(GameState.SIMU)
 
+            if self.state[len(self.state)-1] == GameState.LEVEL_END:
+                if event.type == 25:
+                    pygame.time.set_timer(25, 0)
+                    if self.level_end == "WON":
+                        self.level += 1
+                        self.map = Map(64, path="assets/" + self.levels[self.level])
+                        self.state.pop()
+                    else:
+                        self.map = Map(64, path="assets/" + self.levels[self.level])
+                        self.state.pop()
+
+
     #draw all states onto screen in order first to current (except menu)
     def draw(self):
         self.screen.fill((255, 255, 255))
@@ -106,12 +125,40 @@ class State:
                         self.screen.blit(s, (rect.left, rect.top))
 
                     pygame.draw.rect(self.screen, pygame.Color(255, 0, 0, 50), rect, 2)
+
+            if state == GameState.LEVEL_END:
+                font = pygame.font.SysFont(pygame.font.get_default_font(), 72, bold=True)
+                rect = pygame.Rect(200, 200, 700, 300)
+                if self.level_end == "WON":
+                    blit_text_properly(self.screen, "YOU WIN!", rect, font, 72)
+                else:
+                    blit_text_properly(self.screen, "YOU LOOSE!", rect, font, 72)
+
+
+
         pygame.display.flip()
 
     #update current state
     def update(self):
         if self.state[len(self.state)-1] == GameState.SIMU:
             self.map.update()
+            team1 = 0
+            team2 = 0
+            for unit in self.map.units:
+                if not unit.am_i_dead(42):
+                    if unit.team % 2 == 0:
+                        team1 += 1
+                    else:
+                        team2 += 1
+
+            if team1 == 0 or team2 == 0:
+                self.state.pop()
+                self.state.append(GameState.LEVEL_END)
+                pygame.time.set_timer(25, 100)
+                if team1 == 0:
+                    self.level_end = "LOST"
+                elif team2 == 0:
+                    self.level_end = "WON"
 
         if self.state[len(self.state)-1] == GameState.ARBRE:
             self.tree.update()
