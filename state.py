@@ -12,6 +12,7 @@ class GameState(Enum):
     SIMU            = 2
     ARBRE           = 3
     LEVEL_END       = 4
+    CREDITS         = 5
 
 clock = pygame.time.Clock()
 black = 0, 0, 0
@@ -26,9 +27,10 @@ class State:
         self.modifs_arbres = {}
         self.select_pos = None
         self.clicking = False
+        self.credits_offset = 0
 
-        self.levels = ["tuto2.map", "bersekrabvsvacanciers.map", "map1.map", "tuto2.map"]
-        self.level = 3
+        self.levels = ["tuto1.map", "bersekrabvsvacanciers.map", "map1.map", "tuto2.map"]
+        self.level = 0
         self.map = Map(64, path="assets/" + self.levels[self.level])
 
 
@@ -53,6 +55,8 @@ class State:
 
                 if result == JOUER:
                     self.state = [GameState.BEFORE_SIMU]
+                if result == CREDITS:
+                    self.state.append(GameState.CREDITS)
                 if result == QUITTER:
                     exit()
             if self.state[len(self.state)-1] == GameState.ARBRE:
@@ -134,8 +138,8 @@ class State:
 
                     pygame.draw.rect(self.screen, pygame.Color(255, 0, 0, 50), rect, 2)
 
-                rect2 = pygame.Rect(230, 10, 32, 32)
-                pygame.draw.rect(self.screen, pygame.Color(255, 255, 255, 0), rect2, 0)
+                img = pygame.image.load("assets/arrow2.png")
+                self.screen.blit(img, (230,10))
 
             if state == GameState.LEVEL_END:
                 font = pygame.font.SysFont(pygame.font.get_default_font(), 72, bold=True)
@@ -144,6 +148,10 @@ class State:
                     blit_text_properly(self.screen, "YOU WIN!", rect, font, 72)
                 else:
                     blit_text_properly(self.screen, "YOU LOOSE!", rect, font, 72)
+
+            if state == GameState.CREDITS:
+                img = pygame.image.load("assets/credits.png")
+                self.screen.blit(img, (0,640 - self.credits_offset))
 
 
 
@@ -171,5 +179,9 @@ class State:
                 elif team2 == 0:
                     self.level_end = "WON"
 
-        if self.state[len(self.state)-1] == GameState.ARBRE:
-            pass
+        if self.state[len(self.state)-1] == GameState.CREDITS:
+            if self.credits_offset < 640:
+                self.credits_offset += 20
+            else:
+                self.credits_offset = 0
+                self.state.pop()
