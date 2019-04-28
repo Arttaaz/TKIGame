@@ -143,9 +143,31 @@ class AfficherArbre:
         ### Affiche les actions suivantes et trace des flèches verte entre cette action et les actions suivantes ainsi que les conditions potentielles
         if type(action.list_actions_suivantes) is not type({}):
             action.list_actions_suivantes = {None : action.list_actions_suivantes} # le passe en mode dico pour simplifier le traitement
-        pas_action = place_dispo_largeur // len(action.list_actions_suivantes.keys())
 
-        for val_action in action.list_actions_suivantes: # list_actions_suivantes est un dico !
+        # Regarde le nombre d'actions à afficher réellement
+        actions_a_afficher = []
+        for val_action in action.list_actions_suivantes:
+            rect = is_action_already_blitten(action, dico_rect) # est-ce que l'action existe ?
+            if rect is None:
+                actions_a_afficher.append(val_action) # il faut tracer cette action
+                continue
+
+            milieu_coords = (rect.left+rect.width//2, rect.top)
+            rect_line = adapt_rect_line(pygame.draw.line(self.screen, self.couleur_fleche, coords_fin_action, milieu_coords, WIDTH_LIGNES))
+            dico_rect[(rect_line.left, rect_line.top, rect_line.width, rect_line.height)] = [action, action.list_actions_suivantes[val_action], val_action, coords_fin_action, milieu_coords]
+
+            if val_action is not None: # cas où il y a de condition
+                text = self.font_conditions.render(str(val_action), True, (0, 0, 0))
+                coords_text = centrer_objet((rect_line.left, rect_line.top), (text.get_rect().width, text.get_rect().height), (rect_line.width, rect_line.height))
+                self.screen.blit(text, coords_text)
+
+
+        if actions_a_afficher == []: # aucunes actions à afficher
+            return (coords[0]+background_action_rect.width//2, coords[1])# il n'y a aucunes actions qui découlent de l'action courante
+
+
+        pas_action = place_dispo_largeur // len(actions_a_afficher)
+        for val_action in actions_a_afficher: # contient les clefs des actions à afficher
             milieu_coords = self.afficher_action(action.list_actions_suivantes[val_action], (coord_action[0], coord_action[1]+DECALAGE_ATTRIBUTS_HAUTEUR), pas_action, dico_rect)
             rect_line = adapt_rect_line(pygame.draw.line(self.screen, self.couleur_fleche, coords_fin_action, milieu_coords, WIDTH_LIGNES))
             dico_rect[(rect_line.left, rect_line.top, rect_line.width, rect_line.height)] = [action, action.list_actions_suivantes[val_action], val_action, coords_fin_action, milieu_coords]
