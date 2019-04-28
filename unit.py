@@ -121,12 +121,10 @@ class Unit(GameObject):
 
 
     def tick(self):
-        if self.state == InnerState.WALK:
-            self.grid.cases[self.xmap][self.ymap][UNIT_LAYER] = None
-            self.grid.cases[self.xdest][self.ydest][UNIT_LAYER] = self
-            self.xmap = self.xdest
-            self.ymap = self.ydest
         self.tick_progress = 0
+        if self.state == InnerState.WALK:
+            self.xori = self.xmap
+            self.yori = self.ymap
         self.arbre.eval()
 
 

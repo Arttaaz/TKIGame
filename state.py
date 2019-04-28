@@ -83,7 +83,6 @@ class State:
            if state == GameState.BEFORE_SIMU or state == GameState.SIMU:
                 self.map.draw(self.screen, self.screen.get_width() / 2, self.screen.get_height() / 2)
         if state == GameState.ARBRE:
-            self.tree.update()
             self.tree.render()
 
         if state == GameState.BEFORE_SIMU:
@@ -104,3 +103,6 @@ class State:
     def update(self):
         if self.state[len(self.state)-1] == GameState.SIMU:
             self.map.update()
+
+        if self.state[len(self.state)-1] == GameState.ARBRE:
+            self.tree.update()
