@@ -132,7 +132,8 @@ class Unit(GameObject):
 
     def can_shoot(self):
         if self.target is not None:
-            return True  # TODO: line_of_sight function
+            if self.est_a_portee(5) == "Oui":
+                return True  # TODO: line_of_sight function
         return False
 
 

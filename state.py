@@ -26,7 +26,8 @@ class State:
         self.modifs_arbres = {}
         self.select_pos = None
         self.clicking = False
-        self.levels = ["tuto2.map","tuto1.map", "map.map"]
+
+        self.levels = ["tuto1.map", "map1.map", "bersekrabvsvacanciers.map", "tuto2.map"]
         self.level = 0
         self.map = Map(64, path="assets/" + self.levels[self.level])
 
@@ -88,6 +89,12 @@ class State:
                             for modif in self.modifs_arbres[unit]:
                                 modif.effectuer_modification()
                         self.state.append(GameState.SIMU)
+
+            if self.state[len(self.state)-1] == GameState.SIMU:
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_SPACE:
+                        self.map = Map(64, path="assets/" + self.levels[self.level])
+                        self.state.pop()
 
             if self.state[len(self.state)-1] == GameState.LEVEL_END:
                 if event.type == 25:
@@ -155,7 +162,7 @@ class State:
             if team1 == 0 or team2 == 0:
                 self.state.pop()
                 self.state.append(GameState.LEVEL_END)
-                pygame.time.set_timer(25, 900)
+                pygame.time.set_timer(25, 1200)
                 if team1 == 0:
                     self.level_end = "LOST"
                 elif team2 == 0:

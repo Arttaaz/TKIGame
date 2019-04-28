@@ -11,7 +11,8 @@ screen = pygame.display.set_mode(size)
 
 
 clock = pygame.time.Clock()
-path = "assets/tuto2.map"
+
+path = "assets/map1.map"
 map = Map(64, path = path)
 layer = 0
 while 1:
@@ -54,4 +55,3 @@ while 1:
 
     map.draw(screen, screen.get_width() / 2, screen.get_height() / 2)
     pygame.display.flip()
-    
