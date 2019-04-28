@@ -20,6 +20,7 @@ TAILLE_FONT_CONDITIONS = 10
 TAILLE_FONT_MINIMUM = 4
 DECALAGE_ATTRIBUTS_HAUTEUR = 100 # distance entre deux attributs alignés
 WIDTH_LIGNES = 3
+LARGEUR_HIT_BOX_LIGNES_MINIMALE = 30
 
 
 class AfficherArbre:
@@ -83,7 +84,7 @@ class AfficherArbre:
             blit_text_properly(self.screen, etat.nom_etat, pygame.Rect(coords[0], coords[1], rect.width, rect.height), self.font_etat, TAILLE_FONT_ATTRIBUTS)
             milieu_action = self.afficher_action(etat.action_associee, (coord_etat[0], coord_etat[1]+DECALAGE_ATTRIBUTS_HAUTEUR), pas_etat, dico_rect)
 
-            rect_line = pygame.draw.line(self.screen, self.couleur_fleche, fin_coords_etat, milieu_action, WIDTH_LIGNES)
+            rect_line = adapt_rect_line(pygame.draw.line(self.screen, self.couleur_fleche, fin_coords_etat, milieu_action, WIDTH_LIGNES))
             dico_rect[(rect_line.left, rect_line.top, rect_line.width, rect_line.height)] = [etat, etat.action_associee, None, fin_coords_etat, milieu_action]
 
             coord_etat = (coord_etat[0]+pas_etat, coord_etat[1])
@@ -107,6 +108,12 @@ class AfficherArbre:
 
         Actualise aussi le dico_rect.
         """
+        ### est-ce que l'action est déjà placée ?
+        rect_action = is_action_already_blitten(action, dico_rect)
+        if rect_action is not None:
+            return rect_action # action déjà placée, rien à faire
+
+        ### Affiche l'action de manière normale
         background_action_rect = self.background_action.get_rect()
         ### Affiche l'action
         text = self.font_action.render(action.nom, True, (0, 0, 0))
@@ -140,7 +147,7 @@ class AfficherArbre:
 
         for val_action in action.list_actions_suivantes: # list_actions_suivantes est un dico !
             milieu_coords = self.afficher_action(action.list_actions_suivantes[val_action], (coord_action[0], coord_action[1]+DECALAGE_ATTRIBUTS_HAUTEUR), pas_action, dico_rect)
-            rect_line = pygame.draw.line(self.screen, self.couleur_fleche, coords_fin_action, milieu_coords, WIDTH_LIGNES)
+            rect_line = adapt_rect_line(pygame.draw.line(self.screen, self.couleur_fleche, coords_fin_action, milieu_coords, WIDTH_LIGNES))
             dico_rect[(rect_line.left, rect_line.top, rect_line.width, rect_line.height)] = [action, action.list_actions_suivantes[val_action], val_action, coords_fin_action, milieu_coords]
 
             if val_action is not None: # cas où il y a de condition
@@ -202,6 +209,26 @@ def blit_text_properly(screen, msg, rect, font, taille_font_initial):
     text = font.render(str(msg), True, (0, 0, 0))
     coords = centrer_objet((rect.left, rect.top), (text.get_rect().width, text.get_rect().height), (rect.width, rect.height))
     screen.blit(text, coords)
+
+def adapt_rect_line(rect):
+    """
+    Fais en sorte que la hit box de la ligne
+    soit au moins de la largeur minimale imposée.
+    Retourne un nouveau rect_line valide.
+    """
+    width = max(rect.width, LARGEUR_HIT_BOX_LIGNES_MINIMALE)
+    return pygame.Rect(rect.left+rect.width//2-width//2, rect.top, width, rect.height)
+
+def is_action_already_blitten(action, dict_rect):
+    """
+    Permet de savoir si une action a déjà été dessinée
+    sur l'écran ou non.
+    Si c'est le cas, elle retourne le
+    rect où est placer l'action en question.
+    """
+    for rect in dict_rect:
+        if id(dict_rect[rect]) is id(action):
+            return pygame.Rect(rect)
 
 
 if __name__ == "__main__":

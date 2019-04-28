@@ -88,28 +88,30 @@ class State:
 
         for state in self.state:
             if state == GameState.MENU:
-                self.menu.update_screen(self.screen) 
+                self.menu.update_screen(self.screen)
             if state == GameState.BEFORE_SIMU or state == GameState.SIMU:
                 self.map.draw(self.screen, self.screen.get_width() / 2, self.screen.get_height() / 2)
             if state == GameState.ARBRE:
-                self.tree.update()
                 self.tree.render()
-            
+
             if state == GameState.BEFORE_SIMU:
                 if self.select_pos is not None:
                     rect = pygame.Rect(0, 0, self.map.cell_size, self.map.cell_size)
                     rect.centerx, rect.centery = self.screen.get_width() / 2 + self.select_pos[0], self.screen.get_height() / 2 + self.select_pos[1]
-                    
+
                     if self.clicking:
                         s = pygame.Surface((self.map.cell_size, self.map.cell_size))  # the size of your rect
                         s.set_alpha(128) # alpha level
                         s.fill((0,0,0), rect = pygame.Rect(0, 0, self.map.cell_size, self.map.cell_size))           # this fills the entire surface
                         self.screen.blit(s, (rect.left, rect.top))
-                
-                    pygame.draw.rect(self.screen, pygame.Color(255, 0, 0, 50), rect, 2) 
+
+                    pygame.draw.rect(self.screen, pygame.Color(255, 0, 0, 50), rect, 2)
         pygame.display.flip()
 
     #update current state
     def update(self):
         if self.state[len(self.state)-1] == GameState.SIMU:
             self.map.update()
+
+        if self.state[len(self.state)-1] == GameState.ARBRE:
+            self.tree.update()

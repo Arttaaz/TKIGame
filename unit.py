@@ -122,10 +122,10 @@ class Unit(GameObject):
 
 
     def tick(self):
-        if self.state == InnerState.WALK:
-            self.xmap = self.xori
-            self.ymap = self.yori
         self.tick_progress = 0
+        if self.state == InnerState.WALK:
+            self.xori = self.xmap
+            self.yori = self.ymap
         self.arbre.eval()
 
 
