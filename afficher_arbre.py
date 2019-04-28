@@ -9,7 +9,7 @@ import pygame
 import sys
 
 from dimensions import *
-from arbre import Etat
+from arbre import Etat, Action
 
 PADDING_ARBRE_HAUT = 8
 PADDING_ARBRE_COTES = 15
@@ -108,7 +108,6 @@ class AfficherArbre:
 
         Actualise aussi le dico_rect.
         """
-        
         ### Affiche l'action de manière normale
         background_action_rect = self.background_action.get_rect()
         ### Affiche l'action
@@ -143,13 +142,13 @@ class AfficherArbre:
         # Regarde le nombre d'actions à afficher réellement
         actions_a_afficher = []
         for val_action in action.list_actions_suivantes:
-            rect = is_action_already_blitten(action, dico_rect) # est-ce que l'action existe ?
+            rect = is_action_already_blitten(action.list_actions_suivantes[val_action], dico_rect) # est-ce que l'action existe ?
             if rect is None:
                 print(val_action)
                 actions_a_afficher.append(val_action) # il faut tracer cette action
                 continue
 
-            milieu_coords = (rect.left+rect.width//2, rect.top)
+            milieu_coords = (rect.left+rect.width//2, rect.top) # il faut quand même tracer la ligne qui va vers l'action
             rect_line = adapt_rect_line(pygame.draw.line(self.screen, self.couleur_fleche, coords_fin_action, milieu_coords, WIDTH_LIGNES))
             dico_rect[(rect_line.left, rect_line.top, rect_line.width, rect_line.height)] = [action, action.list_actions_suivantes[val_action], val_action, coords_fin_action, milieu_coords]
 
@@ -246,7 +245,7 @@ def is_action_already_blitten(action, dict_rect):
     rect où est placer l'action en question.
     """
     for rect in dict_rect:
-        if not isinstance(dict_rect[rect], Etat) and dict_rect[rect] is action:
+        if dict_rect[rect] is action:
             return pygame.Rect(rect)
 
 
