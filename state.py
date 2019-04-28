@@ -94,6 +94,7 @@ class State:
                     pygame.time.set_timer(25, 0)
                     if self.level_end == "WON":
                         self.level += 1
+                        print(self.levels[self.level])
                         self.map = Map(64, path="assets/" + self.levels[self.level])
                         self.state.pop()
                     else:
@@ -154,7 +155,7 @@ class State:
             if team1 == 0 or team2 == 0:
                 self.state.pop()
                 self.state.append(GameState.LEVEL_END)
-                pygame.time.set_timer(25, 100)
+                pygame.time.set_timer(25, 900)
                 if team1 == 0:
                     self.level_end = "LOST"
                 elif team2 == 0:

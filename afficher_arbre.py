@@ -63,7 +63,7 @@ class AfficherArbre:
         rect = self.background_etat.get_rect()
         dico_rect = {} # Dictionnaire associant un rect à sont attribut
         self.screen.blit(self.background_arbre, self.coord_background_arbre)
-        
+
         ### Affiche le nom de l'arbre
         longueur_ecran = self.background_arbre.get_rect().width - 2*PADDING_ARBRE_COTES # fois 2 car padding des deux côtés
         pas_etat = longueur_ecran // len(self.arbre.list_etats)
@@ -76,7 +76,7 @@ class AfficherArbre:
         for etat in self.arbre.list_etats:
             coords = centrer_coords_longueur(coord_etat, pas_etat, rect.width)
             fin_coords_etat = (coords[0]+rect.width//2, coords[1]+rect.height)
-            
+
             new_key = coords + (rect.width, rect.height)
             dico_rect[new_key] = etat
 
@@ -97,7 +97,7 @@ class AfficherArbre:
             pygame.draw.line(self.screen, self.couleur_fleche, fin_coords_nom_arbre, coords, WIDTH_LIGNES)
 
         return dico_rect
-        
+
     def afficher_action(self, action, coord_action, place_dispo_largeur, dico_rect):
         """
         Fonction récursive affichant
@@ -144,7 +144,7 @@ class AfficherArbre:
         for val_action in action.list_actions_suivantes:
             rect = is_action_already_blitten(action.list_actions_suivantes[val_action], dico_rect) # est-ce que l'action existe ?
             if rect is None:
-                print(val_action)
+                # print(val_action)
                 actions_a_afficher.append(val_action) # il faut tracer cette action
                 continue
 
