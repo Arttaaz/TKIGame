@@ -99,7 +99,7 @@ class State:
                 if event.type == 25:
                     pygame.time.set_timer(25, 0)
                     if self.level_end == "WON":
-                        self.level += 1
+                        self.level = (self.level + 1) % len(self.levels)
                         print(self.levels[self.level])
                         self.map = Map(64, path="assets/" + self.levels[self.level])
                         self.state.pop()
