@@ -133,6 +133,9 @@ class State:
 
                     pygame.draw.rect(self.screen, pygame.Color(255, 0, 0, 50), rect, 2)
 
+                rect2 = pygame.Rect(250, 10, 32, 32)
+                pygame.draw.rect(self.screen, pygame.Color(255, 255, 255, 0), rect2, 0)
+
             if state == GameState.LEVEL_END:
                 font = pygame.font.SysFont(pygame.font.get_default_font(), 72, bold=True)
                 rect = pygame.Rect(200, 200, 700, 300)
@@ -168,4 +171,5 @@ class State:
                     self.level_end = "WON"
 
         if self.state[len(self.state)-1] == GameState.ARBRE:
-            self.tree.update()
+            # self.tree.update()
+            pass
