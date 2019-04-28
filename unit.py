@@ -136,14 +136,14 @@ class Unit(GameObject):
             self.tick()
 
         if self.hp <= 0 and self.state != InnerState.DEAD:
-
+            self.image = pygame.image.load('assets/grave.png')
             self.state = InnerState.DEAD
             self.collide = False
             self.grid.cases[self.xmap][self.ymap][UNIT_LAYER] = None
             self.grid.cases[self.xmap][self.ymap][DEAD_LAYER] = self
 
         if self.state == InnerState.DEAD:
-            self.rotation += 1
+            self.rotation = 0
         elif self.target is not None:
 
             self.rotation = 0.9 * self.rotation + 0.1 * self.rotation_to_target()
@@ -154,8 +154,9 @@ class Unit(GameObject):
             x += (self.xori - self.xmap) * self.grid.cell_size * (1 - self.tick_progress)
             y += (self.yori - self.ymap) * self.grid.cell_size * (1 - self.tick_progress)
         super().draw(screen, x, y)
-        screen.fill((255, 0, 0), rect=pygame.Rect(self.rect.centerx - 32 + 15, self.rect.centery - 32 + 50, 34 , 5))
-        screen.fill((0, 255, 0), rect=pygame.Rect(self.rect.centerx - 32 + 15, self.rect.centery - 32 + 50, int(34 * self.hp/self.hpmax), 5))
+        if self.state != InnerState.DEAD:
+            screen.fill((255, 0, 0), rect=pygame.Rect(self.rect.centerx - 32 + 15, self.rect.centery - 32 + 50, 34 , 5))
+            screen.fill((0, 255, 0), rect=pygame.Rect(self.rect.centerx - 32 + 15, self.rect.centery - 32 + 50, int(34 * self.hp/self.hpmax), 5))
         if self.state in [InnerState.SHOOT, InnerState.HEAL] and self.target is not None and self.can_shoot():
             pos1 = pygame.Vector2(self.rect.centerx, self.rect.centery)
             pos2 = pygame.Vector2(self.target.rect.centerx, self.target.rect.centery)
