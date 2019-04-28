@@ -99,7 +99,7 @@ class AfficherArbre:
         self.screen.blit(text_nom, coord_nom_arbre)
         fin_coords_nom_arbre = (coord_nom_arbre[0]+text_nom.get_rect().width//2, coord_nom_arbre[1]+text_nom.get_rect().height)
         for coords in coords_debut_etat:
-            pygame.draw.line(self.screen, self.couleur_fleche, fin_coords_nom_arbre, coords, WIDTH_LIGNES)
+            pygame.draw.line(self.screen, COULEUR_FLECHE_BLOQUEE, fin_coords_nom_arbre, coords, WIDTH_LIGNES_BLOQUEES)
 
         return dico_rect
 
