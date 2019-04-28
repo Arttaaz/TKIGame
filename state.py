@@ -19,7 +19,7 @@ class State:
         self.screen = screen
         self.menu = Menu()
         self.arbre_surface = pygame.Surface((screen.get_width(), screen.get_height()))  # the size of your rect
-        self.map    = map 
+        self.map    = map
         self.modifs_arbres = {}
         self.select_pos = None
         self.clicking = False

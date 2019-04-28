@@ -54,7 +54,7 @@ class Unit(GameObject):
                 self.ymap = y
                 self.grid.cases[self.xori][self.yori][UNIT_LAYER] = None
                 self.grid.cases[self.xmap][self.ymap][UNIT_LAYER] = self
-            
+
 
     def set_inner_state(self, state):
         self.state = state
@@ -65,7 +65,7 @@ class Unit(GameObject):
             self.target = self.grid.closest_unit(self, True)
             self.state = InnerState.IDLE
     def shoot(self, param):
-        if self.target is not None and self.can_shoot():
+        if self.can_shoot():
             self.set_inner_state(InnerState.SHOOT)
             self.target.hp -= 34
         else:
@@ -76,11 +76,13 @@ class Unit(GameObject):
             self.target.hp += 10
         else:
             self.set_inner_state(InnerState.FAILED)
-    
+
     def est_a_portee(self, param):
         if self.target is  None:
             return "NO TARGET"
-        return  "Oui" if dist((self.target.xmap, self.target.ymap), (self.xmap, self.ymap)) <= 3 else "Non"
+        # return  "Oui" if self.has_line_of_sight() else "Non"
+        return  "Oui" if ((dist((self.target.xmap, self.target.ymap), (self.xmap, self.ymap)) <= 3) and self.has_line_of_sight()) else "Non"
+
     def rotation_to_target(self):
 
         pos1 = pygame.Vector2(self.rect.centerx, self.rect.centery)
@@ -98,15 +100,33 @@ class Unit(GameObject):
 
 
     def can_shoot(self):
-        if self.target is not None: # TODO: change 3 to range
+        if self.target is not None:
             return True  # TODO: line_of_sight function
         return False
 
-    def tick(self): 
-        self.tick_progress = 0
+
+    def has_line_of_sight(self):
+        vec = pygame.Vector2(self.target.xmap - self.xmap, self.target.ymap - self.ymap)
+        len = vec.length()
+        vec = vec.normalize()/4
+        vec_n = vec.normalize()/4
+        while vec.length() < len:
+            case = self.grid.cases[self.xmap + round(vec.x)][self.ymap + round(vec.y)][UNIT_LAYER]
+            if case is not None:
+                if case.collide and ((case != self.target) and (case != self)):
+                    return False
+            vec += vec_n
+
+        return True
+
+
+    def tick(self):
         if self.state == InnerState.WALK:
-            self.xori = self.xmap
-            self.yori = self.ymap
+            self.grid.cases[self.xmap][self.ymap][UNIT_LAYER] = None
+            self.grid.cases[self.xdest][self.ydest][UNIT_LAYER] = self
+            self.xmap = self.xdest
+            self.ymap = self.ydest
+        self.tick_progress = 0
         self.arbre.eval()
 
 
@@ -115,19 +135,20 @@ class Unit(GameObject):
             self.tick_progress += 1 / 60 / (tick_time)
         if self.state != InnerState.DEAD and self.tick_progress > 1:
             self.tick()
-            
+
         if self.hp <= 0 and self.state != InnerState.DEAD:
 
             self.state = InnerState.DEAD
+            self.collide = False
             self.grid.cases[self.xmap][self.ymap][UNIT_LAYER] = None
             self.grid.cases[self.xmap][self.ymap][DEAD_LAYER] = self
-            
+
         if self.state == InnerState.DEAD:
             self.rotation += 1
         elif self.target is not None:
-            
+
             self.rotation = 0.9 * self.rotation + 0.1 * self.rotation_to_target()
-        
+
 
     def draw(self, screen, x, y):
         if self.state == InnerState.WALK or self.state == InnerState.DEAD:
@@ -141,12 +162,12 @@ class Unit(GameObject):
             pos2 = pygame.Vector2(self.target.rect.centerx, self.target.rect.centery)
             if pos1 != pos2:
                 dir = (pos2 - pos1).normalize()
-                
+
                 begin = pos1 +  dir * 23
                 end = pos2 - dir * 11
-                
+
                 if self.state == InnerState.SHOOT:
-                    self.bullet_progress = (self.tick_progress * 4) % 2 
+                    self.bullet_progress = (self.tick_progress * 4) % 2
                     self.bullet_progress = 1 if self.bullet_progress > 1 else self.bullet_progress
                     draw_progress_line(screen, begin, end, self.bullet_progress, 0.1, 0.9, (0, 0, 0))
                 if self.state == InnerState.HEAL:
@@ -163,17 +184,17 @@ def draw_progress_line(screen,begin, end, progress, deb_time, end_time, color):
     else:
         t = progress / end_time
         p2 = (1 - t) * begin + t * end
-                
+
         pygame.draw.aaline(screen, color, (p1.x, p1.y),
                                (p2.x, p2.y))
-            
+
 def neighbors_map(map, goal):
     def neighbors(unit):
 
         l = []
-        
+
         x, y = unit
-        
+
         if x < (map.width-1) and (map.cases[x+1][y][UNIT_LAYER] is None or map.cases[x+1][y][UNIT_LAYER] == goal or not map.cases[x+1][y][UNIT_LAYER].collide):
             l.append((x+1, y))
         if x > 0 and (map.cases[x-1][y][UNIT_LAYER] is None or map.cases[x-1][y][UNIT_LAYER] == goal or not map.cases[x-1][y][UNIT_LAYER].collide):
