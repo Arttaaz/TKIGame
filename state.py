@@ -27,7 +27,7 @@ class State:
         self.select_pos = None
         self.clicking = False
 
-        self.levels = ["tuto1.map", "bersekrabvsvacanciers.map", "map1.map", "tuto2.map"]
+        self.levels = ["tuto2.map", "bersekrabvsvacanciers.map", "map1.map", "tuto2.map"]
         self.level = 3
         self.map = Map(64, path="assets/" + self.levels[self.level])
 

@@ -57,7 +57,7 @@ class Etat:
     qui sera lancée lorsque l'arbre sera
     dans cet état.
     """
-    def __init__(self, action_associee, liaison_modifiable=True, nom_etat="Idle"):
+    def __init__(self, action_associee, nom_etat="Idle", liaison_modifiable=True):
         """
         Possède un nom et une action,
         l'action sera celle exécutée lorsque l'état
