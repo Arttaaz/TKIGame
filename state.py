@@ -28,7 +28,7 @@ class State:
         self.clicking = False
 
         self.levels = ["tuto1.map", "map1.map", "bersekrabvsvacanciers.map", "tuto2.map"]
-        self.level = 0
+        self.level = 3
         self.map = Map(64, path="assets/" + self.levels[self.level])
 
 
@@ -88,7 +88,7 @@ class State:
                             else:
                                 self.tree = GererArbre(self.screen, object.arbre, self.modifs_arbres[object])
                             self.selected = object
-                            self.state.append(GameState.ARBRE)                        
+                            self.state.append(GameState.ARBRE)
 
             if self.state[len(self.state)-1] == GameState.SIMU:
                 if event.type == pygame.KEYUP:

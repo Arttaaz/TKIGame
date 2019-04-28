@@ -80,7 +80,7 @@ class Unit(GameObject):
         if target == Target.MAX_LIFE_ENEMY:
             self.target = self.grid.high_hp_unit(self, False)
         if target == Target.MIN_LIFE_ENEMY:
-            self.target = self.grid.low_hp_unit(self, False)     
+            self.target = self.grid.low_hp_unit(self, False)
         if target == Target.MAX_LIFE_ALLY:
             self.target = self.grid.high_hp_unit(self, True)
         if target == Target.MIN_LIFE_ALLY:
@@ -88,9 +88,9 @@ class Unit(GameObject):
         if target == Target.RANDOM_ENEMY:
             self.target = self.grid.high_hp_unit(self, False)
         if target == Target.RANDOM_ALLY:
-            self.target = self.grid.low_hp_unit(self, True)     
-        
-        
+            self.target = self.grid.low_hp_unit(self, True)
+
+
     def shoot(self, param):
         if self.can_shoot():
             self.set_inner_state(InnerState.SHOOT)
@@ -107,7 +107,7 @@ class Unit(GameObject):
             self.set_inner_state(InnerState.FAILED)
     def subit_attaque(self):
         return "Oui" if self.is_attacked else "Non"
-        
+
     def est_a_portee(self, param):
         if self.target is  None:
             return "NO TARGET"
@@ -160,7 +160,7 @@ class Unit(GameObject):
         self.arbre.eval()
         self.lastLastUnit = self.lastUnit
         self.lastUnit = None
-        
+
         self.is_attacked = False
     def update(self, map):
         if self.state != InnerState.DEAD:
