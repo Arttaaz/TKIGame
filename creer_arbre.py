@@ -11,16 +11,16 @@ def bronzer(param):
 
 def est_mort(unit,oui, non):
     return Action('Est mort', unit.is_dead, ["Ma Cible"], {"Oui" : oui, "Non" : non})
-def attaquer(unit, suivant):
-    return Action('Attaquer', unit.shoot, ["Ma Cible"], suivant)
+def attaquer(unit, suivant, mod = True):
+    return Action('Attaquer', unit.shoot, ["Ma Cible"], suivant, mod)
 def soigner(unit, suivant):
     return Action('Soigner', unit.heal, ["Ma Cible"], suivant)
 def marcher(unit, suivant):
     return Action('Marcher vers', unit.move, ["Ma Cible"], suivant)
 def bronzer_act(suiv):
     return Action('Bronzer', bronzer, ['Crème'], suiv)
-def select_cible(unit, cible, suiv):
-    return Action('Sélectionner cible', unit.select_target, [cible], suiv)
+def select_cible(unit, cible, suiv, mod = True):
+    return Action('Sélectionner cible', unit.select_target, [cible], suiv, mod)
 def changer_etat(unit, etat, suiv):
     return Action('Changer état', unit.set_tree_state, [etat], suiv)
 def subit(unit, oui, non):
@@ -63,8 +63,8 @@ def creer_unite(unit, id):
 
         ### Code de l'état Attaquer
         attaq = attaquer(unit, None)
-        sel_cible = select_cible(unit, Target.NEAREST_ENEMY, attaq)
-        attaquer_cible = Etat(sel_cible, 'Attaquer')
+        sel_cible = select_cible(unit, Target.NEAREST_ENEMY, attaq, False)
+        attaquer_cible = Etat(sel_cible, 'Attaquer', False)
 
         return Arbre([attaquer_cible], attaquer_cible, "Crabe sniper")
     if id == 4:
