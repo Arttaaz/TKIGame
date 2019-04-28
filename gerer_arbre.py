@@ -36,12 +36,18 @@ class GererArbre:
 
         self.background_bouton = pygame.image.load('assets/arbre/background_bouton.jpeg').convert()
         self.background_clavier = pygame.image.load('assets/arbre/background_clavier.jpg').convert()
+        self.attr_selectionne = None # si vaut None, on a sélectionné aucun attribut de l'arbre
+        self.ligne_selectionnee = None # same
+
+        self.quitter = False
+        self.sauvegarder = False
+        
+        self.dico_rect_attributs = self.afficher_arbre.afficher_arbre()
 
     def lancer_affichage(self):
         """
         Affiche les éléments principaux sur le screen.
         """
-        self.dico_rect_attributs = self.afficher_arbre.afficher_arbre()
         self.afficher_UI()
 
     def afficher_UI(self):
@@ -70,7 +76,7 @@ class GererArbre:
 
             rect_courant.left = rect_courant.left + pas_bouton
 
-    def uptdate_main_screen(self):
+    def update_main_screen(self):
         """
         Update tous les dessins sauf les encadrements
         des rects.
@@ -90,7 +96,26 @@ class GererArbre:
         """
         point_list = ((rect.left-PADDING_ENCADREMENT, rect.top-PADDING_ENCADREMENT), (rect.left+rect.width+PADDING_ENCADREMENT, rect.top-PADDING_ENCADREMENT), (rect.left+rect.width+PADDING_ENCADREMENT, rect.top+rect.height+PADDING_ENCADREMENT), (rect.left-PADDING_ENCADREMENT, rect.top+rect.height+PADDING_ENCADREMENT))
         pygame.draw.lines(self.screen, (255, 0, 0), True, point_list, 2)
-
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONUP:
+            if event.button == 1: #clic gauche
+                obj_click = has_clicked_on_rect(self.dico_rect_attributs, event) # regarde d'abord si on a clické sur un attribut
+                if obj_click is not None: # on a clické sur un attribut
+                    self.gerer_click_arbre(obj_click)
+                obj_click = has_clicked_on_rect(self.dico_rect_boutons, event) # regarde si on a clické sur un bouton
+                if obj_click is not None: # on a clické sur un bouton
+                    self.gerer_click_bouton(obj_click)
+        return self.quitter
+    def render(self):
+        self.lancer_affichage() # dessine l'affichage
+        self.update_main_screen()
+        if self.ligne_selectionnee is not None:
+            self.encadrer_rect(self.ligne_selectionnee[1])
+        elif self.attr_selectionne is not None:
+            self.encadrer_rect(self.attr_selectionne[1])
+        
+    def update(self):
+        pass
     def boucle_principale(self):
         """
         Gère l'ensemble de la fenêtre ici, permets de créé des modifs grâce à la
@@ -107,30 +132,21 @@ class GererArbre:
 
         while not self.quitter:
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
-                elif event.type == pygame.MOUSEBUTTONUP:
-                    if event.button == 1: #clic gauche
-                        obj_click = has_clicked_on_rect(self.dico_rect_attributs, event) # regarde d'abord si on a clické sur un attribut
-                        if obj_click is not None: # on a clické sur un attribut
-                            self.gerer_click_arbre(obj_click)
-                        obj_click = has_clicked_on_rect(self.dico_rect_boutons, event) # regarde si on a clické sur un bouton
-                        if obj_click is not None: # on a clické sur un bouton
-                            self.gerer_click_bouton(obj_click)
+                self.handle_event(event)
 
-            self.uptdate_main_screen()
-            if self.ligne_selectionnee is not None:
-                self.encadrer_rect(self.ligne_selectionnee[1])
-            elif self.attr_selectionne is not None:
-                self.encadrer_rect(self.attr_selectionne[1])
+            self.update()
+            self.render()
             pygame.display.update() # actualise tout le temps l'affichage pour pas se casser le cul
             pygame.time.delay(100)
 
+        return self.get_modifs()
+        
+    def get_modifs(self):
         # fin de la boucle while : on regarde si on sauvegarde ou pas
         if self.sauvegarder:
             return self.modifs + self.modifs_intiales
         return self.modifs_intiales # retourne les modifs initiales si on sauvegarde pas
-
+    
     def gerer_click_arbre(self, obj_click):
         """
         Assume que l'objet sur lequel on a clické n'est pas None.
@@ -172,7 +188,6 @@ class GererArbre:
             self.modifs.pop() # retire la dernière modif
         elif obj_click[0] == "Reset":
             self.modifs = []
-            pygame.display.update()
 
     def gerer_nouveau_modif(self, modif):
         """
