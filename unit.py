@@ -58,6 +58,7 @@ class Unit(GameObject):
     def select_target(self, target):
         if target == Target.NEAREST_ENEMY:
             self.target = self.grid.closest_unit(self, True)
+            self.state = InnerState.IDLE
     def shoot(self, param):
         if self.target is not None and self.can_shoot():
             self.set_inner_state(InnerState.SHOOT)
@@ -86,7 +87,6 @@ class Unit(GameObject):
         return self.hp <= 0
     def is_dead(self, param):
         if self.target is None or self.target.am_i_dead(param):
-            print("il est mort le con")
             return "Oui"
         else:
             return "Non"
