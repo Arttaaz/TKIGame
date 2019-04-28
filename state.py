@@ -16,7 +16,7 @@ class State:
     def __init__(self, screen, map):
         self.state  = [GameState.BEFORE_SIMU] # TODO: change to MENU when menu exists
         self.screen = screen
-        self.map    = map 
+        self.map    = map
         self.modifs_arbres = {}
         self.select_pos = None
         self.clicking = False
@@ -39,13 +39,13 @@ class State:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
-                
+
             if self.state[len(self.state)-1] == GameState.BEFORE_SIMU:
                 if event.type == pygame.MOUSEMOTION:
                     map_pos_x, map_pos_y = (self.map.world_to_map_x(int(event.pos[0] - self.screen.get_width() / 2)),
                                             self.map.world_to_map_y(int(event.pos[1] - self.screen.get_height() / 2)))
                     object = self.map.cases[map_pos_x][map_pos_y][UNIT_LAYER]
-                    
+
                     if isinstance(object, Unit):
                         self.select_pos = (self.map.map_to_world_x(map_pos_x), self.map.map_to_world_x(map_pos_y))
                     else:
@@ -82,14 +82,14 @@ class State:
             if self.select_pos is not None:
                 rect = pygame.Rect(0, 0, self.map.cell_size, self.map.cell_size)
                 rect.centerx, rect.centery = self.screen.get_width() / 2 + self.select_pos[0], self.screen.get_height() / 2 + self.select_pos[1]
-                    
+
                 if self.clicking:
                     s = pygame.Surface((self.map.cell_size, self.map.cell_size))  # the size of your rect
                     s.set_alpha(128) # alpha level
                     s.fill((0,0,0), rect = pygame.Rect(0, 0, self.map.cell_size, self.map.cell_size))           # this fills the entire surface
                     self.screen.blit(s, (rect.left, rect.top))
-                
-                pygame.draw.rect(self.screen, pygame.Color(255, 0, 0, 50), rect, 2) 
+
+                pygame.draw.rect(self.screen, pygame.Color(255, 0, 0, 50), rect, 2)
         pygame.display.flip()
 
     #update current state
