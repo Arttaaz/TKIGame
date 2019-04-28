@@ -36,6 +36,7 @@ class Menu:
                 self.dict_images["{}_{}".format(nom_i, nom_e)] = pygame.image.load('assets/menu/{}_{}.png'.format(nom_i, nom_e))
         self.dict_images["background_menu1"] = pygame.image.load('assets/menu/background1.png').convert()
         self.dict_images["background_menu2"] = pygame.image.load('assets/menu/background2.png').convert()
+        self.dict_images["titre"] = pygame.image.load('assets/menu/titre.png')
 
         self.timer = 0
         self.etat_boutons = [IDLE for _ in range(len(self.nom_images))]
@@ -51,7 +52,10 @@ class Menu:
         - immages : dictionnaire contenant toutes les images chargées des boutons dans
         tout les etats possibles
         """
-        coord_courant = (0, 250)
+        img = self.dict_images["titre"]
+        
+       
+        coord_courant = (0, 280)
         self.timer += 0.01
         if self.timer > 1 :
             self.timer = 0
@@ -59,7 +63,9 @@ class Menu:
             screen.blit(self.dict_images["background_menu1"], (0, 0))
         else:
             screen.blit(self.dict_images["background_menu2"], (0, 0))
-            
+
+        screen.blit(img,(255, 40))
+
         pas_bouton = HAUTEUR_FENETRE // (len(self.etat_boutons) + 3)
         for num_bouton in range(len(self.etat_boutons)):
             img = self.dict_images["{}_{}".format(self.nom_images[num_bouton], self.etats[self.etat_boutons[num_bouton]])]
