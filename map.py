@@ -82,17 +82,17 @@ class Map:
     Transformer une coordonnee world en coordonnee map
     """
     def world_to_map_x(self, x):
-        return int((x + self.cell_size * self.width / 2)) // self.cell_size
+        return max(min(int((x + self.cell_size * self.width / 2)) // self.cell_size, self.width - 1), 0)
     def world_to_map_y(self, y):
-        return int((y + self.cell_size * self.height / 2)) // self.cell_size
+        return max(min(int((y + self.cell_size * self.height / 2)) // self.cell_size, self.height - 1), 0)
 
     """
     Transforme une coordonnée map en coordonnée world
     """
     def map_to_world_x(self, x):
-        return x * self.cell_size + self.cell_size / 2 - self.cell_size * (self.width - 1) / 2
+        return x * self.cell_size - self.cell_size * (self.width - 1) / 2
     def map_to_world_y(self, x):
-        return y * self.cell_size + self.cell_size / 2 - self.cell_size * (self.height - 1) / 2
+        return y * self.cell_size - self.cell_size * (self.height - 1) / 2
 
 
     def id(self, x, y, z):

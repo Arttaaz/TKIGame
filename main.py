@@ -10,7 +10,7 @@ size = width, height = dimensions.LONGUEUR_FENETRE, dimensions.HAUTEUR_FENETRE
 black = 0, 0, 0
 
 # clock = pygame.time.Clock()
-screen = pygame.display.set_mode(size)
+screen = pygame.display.set_mode(size, pygame.DOUBLEBUF, 32)
 path = "assets/map.map"
 map = Map(64, path=path, depth=1)
 game = State(screen, map).start()

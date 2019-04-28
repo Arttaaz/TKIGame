@@ -29,7 +29,6 @@ class Arbre:
         for etat in self.list_etats:
             if etat.nom_etat == nom_etat:
                 self.etat_courant = etat
-                print(self.etat_courant)
                 break
 
     def eval(self):

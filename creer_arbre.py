@@ -24,7 +24,7 @@ def creer_unite_attaque(unit):
     attaquer_cible = Etat(est_a_portee1, 'Attaquer cible')
 
     ### Code de l'état Soigner cible
-    soigner1 = Action('Soigner', action_inutile, ["Cible courante"], None)
+    soigner1 = Action('Soigner', unit.heal, ["Cible courante"], None)
     marcher_vers2 = Action('Marcher vers', unit.move, ["Cible courante"], None)
     est_a_portee2 = Action('Est à portée', unit.est_a_portee, ["Cible courante"], {"Oui" : soigner1, "Non" : marcher_vers2})
     soigner_cible = Etat(est_a_portee2, 'Soigner cible')

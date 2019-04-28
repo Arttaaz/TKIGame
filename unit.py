@@ -11,7 +11,8 @@ from target import Target
 class InnerState(Enum):
     IDLE = "Idle"
     SHOOT = "Attaquer"
-    SHOOT_FAILED = "Attaque impossible..."
+    FAILED = "Impossible..."
+    HEAL = "Soin"
     WALK = "Marche"
     DEAD = "DEAD"
 
@@ -41,7 +42,7 @@ class Unit(GameObject):
 
 
     def move(self, param):
-        if not self.can_shoot():
+        if self.target is not None:
             path = astar.find_path((self.xmap, self.ymap), (self.target.xmap, self.target.ymap), neighbors_fnct=neighbors_map(self.grid, self.target), heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist)
             if path is not None:
                 path = list(path)
@@ -60,10 +61,20 @@ class Unit(GameObject):
     def shoot(self, param):
         if self.target is not None and self.can_shoot():
             self.set_inner_state(InnerState.SHOOT)
+            self.target.hp -= 34
         else:
-            self.set_inner_state(InnerState.SHOOT_FAILED)
+            self.set_inner_state(InnerState.FAILED)
+    def heal(self, param):
+        if self.target is not None and self.can_shoot():
+            self.set_inner_state(InnerState.HEAL)
+            self.target.hp += 10
+        else:
+            self.set_inner_state(InnerState.FAILED)
+    
     def est_a_portee(self, param):
-        return  "Oui" if self.target is not None and dist((self.target.xmap, self.target.ymap), (self.xmap, self.ymap)) <= 3 else "Non"
+        if self.target is  None:
+            return "NO TARGET"
+        return  "Oui" if dist((self.target.xmap, self.target.ymap), (self.xmap, self.ymap)) <= 3 else "Non"
     def rotation_to_target(self):
 
         pos1 = pygame.Vector2(self.rect.centerx, self.rect.centery)
@@ -71,23 +82,22 @@ class Unit(GameObject):
         dir = pos2 - pos1
         y = pygame.Vector2(0, 1)
         return( 180 - y.angle_to(dir)) % 360
+    def am_i_dead(self, param):
+        return self.hp <= 0
     def is_dead(self, param):
-        if self.target.state == InnerState.DEAD:
+        if self.target is None or self.target.am_i_dead(param):
+            print("il est mort le con")
             return "Oui"
         else:
             return "Non"
 
 
     def can_shoot(self):
-        if self.target is not None and dist((self.xmap, self.ymap), (self.target.xmap, self.target.ymap)) <= 3: # TODO: change 3 to range
+        if self.target is not None: # TODO: change 3 to range
             return True  # TODO: line_of_sight function
         return False
 
-    def tick(self):
-        if self.state == InnerState.SHOOT and self.target is not None:
-               self.target.hp -= 34
-        if self.state == InnerState.SHOOT_FAILED:
-            pass
+    def tick(self): 
         if self.state == InnerState.WALK:
             self.grid.cases[self.xmap][self.ymap][UNIT_LAYER] = None
             self.grid.cases[self.xdest][self.ydest][UNIT_LAYER] = self
@@ -124,30 +134,36 @@ class Unit(GameObject):
         super().draw(screen, x, y)
         screen.fill((255, 0, 0), rect=pygame.Rect(self.rect.centerx - 32 + 15, self.rect.centery - 32 + 50, 34 , 5))
         screen.fill((0, 255, 0), rect=pygame.Rect(self.rect.centerx - 32 + 15, self.rect.centery - 32 + 50, int(34 * self.hp/self.hpmax), 5))
-        if self.state == InnerState.SHOOT and self.target is not None and self.can_shoot():
+        if self.state in [InnerState.SHOOT, InnerState.HEAL] and self.target is not None and self.can_shoot():
             pos1 = pygame.Vector2(self.rect.centerx, self.rect.centery)
             pos2 = pygame.Vector2(self.target.rect.centerx, self.target.rect.centery)
-            dir = (pos2 - pos1).normalize()
-            self.bullet_progress = (self.tick_progress * 4) % 2 
-            self.bullet_progress = 1 if self.bullet_progress > 1 else self.bullet_progress
-            begin = pos1 +  dir * 23
-            end = pos2 - dir * 11
-
-            if self.bullet_progress < 0.1:
-                p1 = begin
-            else:
-                t = (self.bullet_progress - 0.1) / 0.9
-                p1 = (1 - t) * begin + t * end
-            if self.bullet_progress > 0.9:
-                p2 = end
-            else:
-                t = self.bullet_progress / 0.9
-                p2 = (1 - t) * begin + t * end
-
-
-            pygame.draw.aaline(screen, (0, 0, 0), (p1.x, p1.y),
-                                (p2.x, p2.y))
-        
+            if pos1 != pos2:
+                dir = (pos2 - pos1).normalize()
+                
+                begin = pos1 +  dir * 23
+                end = pos2 - dir * 11
+                
+                if self.state == InnerState.SHOOT:
+                    self.bullet_progress = (self.tick_progress * 4) % 2 
+                    self.bullet_progress = 1 if self.bullet_progress > 1 else self.bullet_progress
+                    draw_progress_line(screen, begin, end, self.bullet_progress, 0.1, 0.9, (0, 0, 0))
+                if self.state == InnerState.HEAL:
+                    self.soin_progress = (self.tick_progress * 2) % 2
+                    draw_progress_line(screen, begin, end, self.soin_progress, 0.4, 0.6, (0, 255, 0))
+def draw_progress_line(screen,begin, end, progress, deb_time, end_time, color):
+    if progress < deb_time:
+        p1 = begin
+    else:
+        t = (progress - deb_time) / (1 - deb_time)
+        p1 = (1 - t) * begin + t * end
+    if progress > end_time:
+        p2 = end
+    else:
+        t = progress / end_time
+        p2 = (1 - t) * begin + t * end
+                
+        pygame.draw.aaline(screen, color, (p1.x, p1.y),
+                               (p2.x, p2.y))
             
 def neighbors_map(map, goal):
     def neighbors(unit):
