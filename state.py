@@ -72,6 +72,12 @@ class State:
                 if event.type == pygame.MOUSEBUTTONUP:
                     self.clicking = False
                     if event.button == 1:
+                        if event.pos[0] >= 230 and event.pos[0] <= 262 and event.pos[1] >= 10 and event.pos[1] <= 42:
+                            for unit in self.modifs_arbres:
+                                for modif in self.modifs_arbres[unit]:
+                                    modif.effectuer_modification()
+                            self.state.append(GameState.SIMU)
+
                         map_pos_x, map_pos_y = (self.map.world_to_map_x(int(event.pos[0] - self.screen.get_width() / 2)),
                                        self.map.world_to_map_y(int(event.pos[1] - self.screen.get_height() / 2)))
                         object = self.map.cases[map_pos_x][map_pos_y][UNIT_LAYER]
@@ -81,13 +87,7 @@ class State:
                             else:
                                 self.tree = GererArbre(self.screen, object.arbre, self.modifs_arbres[object])
                             self.selected = object
-                            self.state.append(GameState.ARBRE)
-
-                    elif event.button == 3:
-                        for unit in self.modifs_arbres:
-                            for modif in self.modifs_arbres[unit]:
-                                modif.effectuer_modification()
-                        self.state.append(GameState.SIMU)
+                            self.state.append(GameState.ARBRE)                        
 
             if self.state[len(self.state)-1] == GameState.SIMU:
                 if event.type == pygame.KEYUP:
@@ -133,7 +133,7 @@ class State:
 
                     pygame.draw.rect(self.screen, pygame.Color(255, 0, 0, 50), rect, 2)
 
-                rect2 = pygame.Rect(250, 10, 32, 32)
+                rect2 = pygame.Rect(230, 10, 32, 32)
                 pygame.draw.rect(self.screen, pygame.Color(255, 255, 255, 0), rect2, 0)
 
             if state == GameState.LEVEL_END:
