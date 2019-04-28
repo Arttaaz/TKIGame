@@ -16,12 +16,8 @@ class State:
     def __init__(self, screen, map):
         self.state  = [GameState.BEFORE_SIMU] # TODO: change to MENU when menu exists
         self.screen = screen
-<<<<<<< HEAD
-        self.map    = map
-=======
         self.arbre_surface = pygame.Surface((screen.get_width(), screen.get_height()))  # the size of your rect
-        self.map    = map 
->>>>>>> eaea9ecf21554a698d172ede55af26afb31eea6e
+        self.map    = map
         self.modifs_arbres = {}
         self.select_pos = None
         self.clicking = False
@@ -44,23 +40,15 @@ class State:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
-<<<<<<< HEAD
-
-=======
             if self.state[len(self.state)-1] == GameState.ARBRE:
                 if self.tree.handle_event(event):
                     self.modifs_arbres[self.selected] = self.tree.get_modifs()
                     self.state.pop()
->>>>>>> eaea9ecf21554a698d172ede55af26afb31eea6e
             if self.state[len(self.state)-1] == GameState.BEFORE_SIMU:
                 if event.type == pygame.MOUSEMOTION:
                     map_pos_x, map_pos_y = (self.map.world_to_map_x(int(event.pos[0] - self.screen.get_width() / 2)),
                                             self.map.world_to_map_y(int(event.pos[1] - self.screen.get_height() / 2)))
                     object = self.map.cases[map_pos_x][map_pos_y][UNIT_LAYER]
-<<<<<<< HEAD
-
-=======
->>>>>>> eaea9ecf21554a698d172ede55af26afb31eea6e
                     if isinstance(object, Unit):
                         self.select_pos = (self.map.map_to_world_x(map_pos_x), self.map.map_to_world_y(map_pos_y))
                     else:
@@ -97,7 +85,7 @@ class State:
         if state == GameState.ARBRE:
             self.tree.update()
             self.tree.render()
-            
+
         if state == GameState.BEFORE_SIMU:
             if self.select_pos is not None:
                 rect = pygame.Rect(0, 0, self.map.cell_size, self.map.cell_size)
