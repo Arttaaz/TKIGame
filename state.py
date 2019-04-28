@@ -12,6 +12,7 @@ class GameState(Enum):
     SIMU            = 2
     ARBRE           = 3
     LEVEL_END       = 4
+    CREDITS         = 5
 
 clock = pygame.time.Clock()
 black = 0, 0, 0
@@ -26,9 +27,10 @@ class State:
         self.modifs_arbres = {}
         self.select_pos = None
         self.clicking = False
+        self.credits_offset = 0
 
         self.levels = ["tuto1.map", "map1.map", "bersekrabvsvacanciers.map", "tuto2.map"]
-        self.level = 3
+        self.level = 1
         self.map = Map(64, path="assets/" + self.levels[self.level])
 
 
@@ -145,6 +147,10 @@ class State:
                 else:
                     blit_text_properly(self.screen, "YOU LOOSE!", rect, font, 72)
 
+            if state == GameState.CREDITS:
+                img = pygame.image.load("assets/credits.png")
+                self.screen.blit(img, (0,640 - self.credits_offset))
+
 
 
         pygame.display.flip()
@@ -171,6 +177,8 @@ class State:
                 elif team2 == 0:
                     self.level_end = "WON"
 
-        if self.state[len(self.state)-1] == GameState.ARBRE:
-            # self.tree.update()
-            pass
+        if self.state[len(self.state)-1] == GameState.CREDITS:
+            if self.credits_offset < 640:
+                self.credits_offset += 20
+            else:
+                self.state.pop()
