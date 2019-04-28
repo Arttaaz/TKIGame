@@ -57,7 +57,7 @@ class Etat:
     qui sera lancée lorsque l'arbre sera
     dans cet état.
     """
-    def __init__(self, action_associee, nom_etat="Idle"):
+    def __init__(self, action_associee, liaison_modifiable=True, nom_etat="Idle"):
         """
         Possède un nom et une action,
         l'action sera celle exécutée lorsque l'état
@@ -65,6 +65,7 @@ class Etat:
         """
         self.nom_etat = nom_etat
         self.action_associee = action_associee
+        self.liaison_modifiable = liaison_modifiable
 
     def execute(self):
         """
@@ -87,7 +88,7 @@ class Action:
     Elle se termine par l'exécution d'une fonction parmi
     les celles qu'elle connait, ou par rien si c'est la fin de l'arbre.
     """
-    def __init__(self, nom, action_associee, params_action_associee, list_actions_suivantes):
+    def __init__(self, nom, action_associee, params_action_associee, list_actions_suivantes, liaison_modifiable=None):
         """
         Si list_actions_suivantes vaut None, alors c'est que c'est la fin de l'arbre.
         Si params_action_associee vaut None, alors il n'y a pas de paramètres pour l'action associée.
@@ -95,7 +96,17 @@ class Action:
         self.nom = nom
         self.action_associee = action_associee
         self.params_action_associee = params_action_associee
+        if type(list_actions_suivantes) is not type({}) and list_actions_suivantes is not None:
+            list_actions_suivantes = {None : list_actions_suivantes} # transforme le paramètre en dico pour simplifier
         self.list_actions_suivantes = list_actions_suivantes
+        self.liaison_modifiable = liaison_modifiable if type(liaison_modifiable) is type({}) else {}
+
+        if liaison_modifiable is None and list_actions_suivantes is not None: # le paramètre par défaut n'a pas été changé, on initialise le tableau à True
+            for val_action in self.list_actions_suivantes:
+                self.liaison_modifiable[val_action] = True # valeur par défaut
+        elif type(liaison_modifiable) is not type({}) and list_actions_suivantes is not None: # on a donné une valeur par défaut
+            for val_action in self.list_actions_suivantes:
+                self.liaison_modifiable[val_action] = liaison_modifiable
 
     def execute(self):
         """
