@@ -162,11 +162,11 @@ class AfficherArbre:
                 self.screen.blit(text, coords_text)
 
 
-        if action_a_afficher == []: # aucunes actions à afficher
+        if actions_a_afficher == []: # aucunes actions à afficher
             return (coords[0]+background_action_rect.width//2, coords[1])# il n'y a aucunes actions qui découlent de l'action courante
 
 
-        pas_action = place_dispo_largeur // len(action_a_afficher)
+        pas_action = place_dispo_largeur // len(actions_a_afficher)
         for val_action in actions_a_afficher: # contient les clefs des actions à afficher
             milieu_coords = self.afficher_action(action.list_actions_suivantes[val_action], (coord_action[0], coord_action[1]+DECALAGE_ATTRIBUTS_HAUTEUR), pas_action, dico_rect)
             rect_line = adapt_rect_line(pygame.draw.line(self.screen, self.couleur_fleche, coords_fin_action, milieu_coords, WIDTH_LIGNES))
