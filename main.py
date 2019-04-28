@@ -9,6 +9,5 @@ pygame.init()
 size = width, height = dimensions.LONGUEUR_FENETRE, dimensions.HAUTEUR_FENETRE
 screen = pygame.display.set_mode(size, pygame.DOUBLEBUF, 32)
 path = "assets/map.map"
-map = Map(64, path=path, depth=1)
 
-State(screen, map).start()
+State(screen).start()
