@@ -8,6 +8,23 @@ from target import Target
 
 def bronzer(param):
     pass
+
+def est_mort(unit,oui, non):
+    return Action('Est mort', unit.is_dead, ["Ma Cible"], {"Oui" : oui, "Non" : non})
+def attaquer(unit, suivant):
+    return Action('Attaquer', unit.shoot, ["Ma Cible"], suivant)
+def marcher(unit, suivant):
+    return Action('Marcher vers', unit.move, ["Ma Cible"], suivant)
+def bronzer_act(suiv):
+    return Action('Bronzer', bronzer, ['Crème'], suiv)
+def select_cible(unit, cible, suiv):
+    return Action('Sélectionner cible', unit.select_target, [cible], suiv)
+def changer_etat(unit, etat, suiv):
+    return Action('Changer état', unit.set_tree_state, [etat], suiv)
+def subit(unit, oui, non):
+    return Action('Menacé ?', unit.subit_attaque, None, {"Oui" : oui, "Non" : non})
+def est_a_portee(unit, oui, non):
+    return Action('Est à portée', unit.est_a_portee, ["Ma Cible"], {"Oui" : oui, "Non" : non})
 def creer_unite(unit, id):
     if id == 1:
         ### Code de l'état Idle
@@ -17,11 +34,29 @@ def creer_unite(unit, id):
         idle = Etat(selectionner_cible1, 'Idle')
 
         ### Code de l'état Attaquer cible
-        attaquer1 = Action('Attaquer', unit.shoot, ["Ma Cible"], None)
+        attaquer1 = Action('Attaquer', unit.shoot, ["Ma Cible"], bronzer1)
         
         attaquer_cible = Etat(attaquer1, 'Attaquer')
 
-        return Arbre([idle, attaquer_cible], idle, "Unité basique")
+        return Arbre([idle, attaquer_cible], idle, "Crabe vacancier")
+    if id == 2:
+        ### Code de l'état Idle
+        changer_eta = changer_etat(unit, "Attaquer", None)
+        selectionner_cible1 = Action('Sélectionner cible', unit.select_target, [Target.NEAREST_ENEMY], changer_eta)
+        
+        idle = Etat(selectionner_cible1, 'Idle')
+
+        ### Code de l'état Attaquer
+        changer_et = changer_etat(unit, "Idle", None)
+        march = marcher(unit, None)
+        attaq = attaquer(unit, None)
+        est_a_portee1 = est_a_portee(unit, attaq, march)
+        est_m = est_mort(unit, changer_et, est_a_portee1)
+        sel_cible = select_cible(unit, Target.NEAREST_ENEMY, est_a_portee1)
+        subit_attaque = subit(unit, sel_cible, est_m)
+        attaquer_cible = Etat(subit_attaque, 'Attaquer')
+
+        return Arbre([idle, attaquer_cible], idle, "BerserKrabe")
     return creer_unite_attaque(unit)
 def creer_unite_attaque(unit):
     """
