@@ -17,7 +17,7 @@ class InnerState(Enum):
     DEAD = "DEAD"
 
 bullet_time = 0.3
-tick_time = 1
+tick_time = 0.4
 UNIT_LAYER = 2
 DEAD_LAYER = 1
 class Unit(GameObject):
@@ -27,8 +27,8 @@ class Unit(GameObject):
         self.target = None
         self.xmap = xmap
         self.ymap = ymap
-        self.xdest = xmap
-        self.ydest = ymap
+        self.xori = xmap
+        self.yori = ymap
         self.team = id
         self.hp = 100
         self.hpmax = 100
@@ -48,8 +48,13 @@ class Unit(GameObject):
                 path = list(path)
                 x, y = path[1]
                 self.state = InnerState.WALK
-                self.xdest = x
-                self.ydest = y
+                self.xori = self.xmap
+                self.yori = self.ymap
+                self.xmap = x
+                self.ymap = y
+                self.grid.cases[self.xori][self.yori][UNIT_LAYER] = None
+                self.grid.cases[self.xmap][self.ymap][UNIT_LAYER] = self
+
 
     def set_inner_state(self, state):
         self.state = state
@@ -122,7 +127,6 @@ class Unit(GameObject):
             self.xmap = self.xdest
             self.ymap = self.ydest
         self.tick_progress = 0
-
         self.arbre.eval()
 
 
@@ -148,8 +152,8 @@ class Unit(GameObject):
 
     def draw(self, screen, x, y):
         if self.state == InnerState.WALK or self.state == InnerState.DEAD:
-            x += (self.xdest - self.xmap) * self.grid.cell_size * self.tick_progress
-            y += (self.ydest - self.ymap) * self.grid.cell_size * self.tick_progress
+            x += (self.xori - self.xmap) * self.grid.cell_size * (1 - self.tick_progress)
+            y += (self.yori - self.ymap) * self.grid.cell_size * (1 - self.tick_progress)
         super().draw(screen, x, y)
         screen.fill((255, 0, 0), rect=pygame.Rect(self.rect.centerx - 32 + 15, self.rect.centery - 32 + 50, 34 , 5))
         screen.fill((0, 255, 0), rect=pygame.Rect(self.rect.centerx - 32 + 15, self.rect.centery - 32 + 50, int(34 * self.hp/self.hpmax), 5))

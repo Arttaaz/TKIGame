@@ -16,7 +16,12 @@ class State:
     def __init__(self, screen, map):
         self.state  = [GameState.BEFORE_SIMU] # TODO: change to MENU when menu exists
         self.screen = screen
+<<<<<<< HEAD
         self.map    = map
+=======
+        self.arbre_surface = pygame.Surface((screen.get_width(), screen.get_height()))  # the size of your rect
+        self.map    = map 
+>>>>>>> eaea9ecf21554a698d172ede55af26afb31eea6e
         self.modifs_arbres = {}
         self.select_pos = None
         self.clicking = False
@@ -39,15 +44,25 @@ class State:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
+<<<<<<< HEAD
 
+=======
+            if self.state[len(self.state)-1] == GameState.ARBRE:
+                if self.tree.handle_event(event):
+                    self.modifs_arbres[self.selected] = self.tree.get_modifs()
+                    self.state.pop()
+>>>>>>> eaea9ecf21554a698d172ede55af26afb31eea6e
             if self.state[len(self.state)-1] == GameState.BEFORE_SIMU:
                 if event.type == pygame.MOUSEMOTION:
                     map_pos_x, map_pos_y = (self.map.world_to_map_x(int(event.pos[0] - self.screen.get_width() / 2)),
                                             self.map.world_to_map_y(int(event.pos[1] - self.screen.get_height() / 2)))
                     object = self.map.cases[map_pos_x][map_pos_y][UNIT_LAYER]
+<<<<<<< HEAD
 
+=======
+>>>>>>> eaea9ecf21554a698d172ede55af26afb31eea6e
                     if isinstance(object, Unit):
-                        self.select_pos = (self.map.map_to_world_x(map_pos_x), self.map.map_to_world_x(map_pos_y))
+                        self.select_pos = (self.map.map_to_world_x(map_pos_x), self.map.map_to_world_y(map_pos_y))
                     else:
                         self.select_pos = None
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -63,7 +78,8 @@ class State:
                                 self.tree = GererArbre(self.screen, object.arbre)
                             else:
                                 self.tree = GererArbre(self.screen, object.arbre, self.modifs_arbres[object])
-                            self.modifs_arbres[object] = self.tree.boucle_principale()
+                            self.selected = object
+                            self.state.append(GameState.ARBRE)
 
                     elif event.button == 3:
                         for unit in self.modifs_arbres:
@@ -73,11 +89,15 @@ class State:
 
     #draw all states onto screen in order first to current (except menu)
     def draw(self):
-        self.screen.fill(black)
+        self.screen.fill((255, 255, 255))
 
         for state in self.state:
            if state == GameState.BEFORE_SIMU or state == GameState.SIMU:
                 self.map.draw(self.screen, self.screen.get_width() / 2, self.screen.get_height() / 2)
+        if state == GameState.ARBRE:
+            self.tree.update()
+            self.tree.render()
+            
         if state == GameState.BEFORE_SIMU:
             if self.select_pos is not None:
                 rect = pygame.Rect(0, 0, self.map.cell_size, self.map.cell_size)

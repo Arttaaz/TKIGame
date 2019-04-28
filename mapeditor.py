@@ -1,9 +1,10 @@
 import sys, pygame
 from unit import Unit
 from map import Map
+import dimensions
 pygame.init()
 
-size = width, height = 800, 800
+size = width, height = dimensions.LONGUEUR_FENETRE, dimensions.HAUTEUR_FENETRE
 black = 0, 0, 0
 
 screen = pygame.display.set_mode(size)
