@@ -30,14 +30,15 @@ class Unit(GameObject):
         self.xori = xmap
         self.yori = ymap
         self.behaviour = behaviour
-        self.team = id
-        self.hp = 100
-        self.hpmax = 100
+        self.team = id % 2
+        self.hp = 100 * (self.team + 1)
+        self.hpmax = 100 * (self.team + 1)
         self.bullet_progress = 0
         self.tick_progress = 0
         self.start_shooting_time = 0
         self.start_shooting = False
         self.lastUnit = None
+        self.lastLastUnit = None
         self.is_attacked = False
         self.arbre = creer_unite(self, self.behaviour)
     def follow(self, target):
@@ -65,24 +66,48 @@ class Unit(GameObject):
         self.arbre.set_state(state)
     def select_target(self, target):
         if target == Target.NEAREST_ENEMY:
+            self.target = self.grid.closest_unit(self, False)
+        if target == Target.NEAREST_ALLY:
             self.target = self.grid.closest_unit(self, True)
-            self.state = InnerState.IDLE
+        if target == Target.FARTHEST_ENEMY:
+            self.target = self.grid.farthest_unit(self, False)
+        if target == Target.FARTHEST_ALLY:
+            self.target = self.grid.closest_unit(self, True)
+        if target == Target.THREAT:
+            self.target = self.lastLastUnit
+            if self.target is None:
+                self.target = self.grid.closest_unit(self, False)
+        if target == Target.MAX_LIFE_ENEMY:
+            self.target = self.grid.high_hp_unit(self, False)
+        if target == Target.MIN_LIFE_ENEMY:
+            self.target = self.grid.low_hp_unit(self, False)
+        if target == Target.MAX_LIFE_ALLY:
+            self.target = self.grid.high_hp_unit(self, True)
+        if target == Target.MIN_LIFE_ALLY:
+            self.target = self.grid.low_hp_unit(self, True)
+        if target == Target.RANDOM_ENEMY:
+            self.target = self.grid.high_hp_unit(self, False)
+        if target == Target.RANDOM_ALLY:
+            self.target = self.grid.low_hp_unit(self, True)
+
+
     def shoot(self, param):
         if self.can_shoot():
             self.set_inner_state(InnerState.SHOOT)
             self.target.hp -= 34
             self.target.is_attacked = True
+            self.target.lastUnit = self
         else:
             self.set_inner_state(InnerState.FAILED)
     def heal(self, param):
         if self.target is not None and self.can_shoot():
             self.set_inner_state(InnerState.HEAL)
-            self.target.hp += 10
+            self.target.hp += 34
         else:
             self.set_inner_state(InnerState.FAILED)
     def subit_attaque(self):
         return "Oui" if self.is_attacked else "Non"
-        
+
     def est_a_portee(self, param):
         if self.target is  None:
             return "NO TARGET"
@@ -133,8 +158,10 @@ class Unit(GameObject):
             self.xori = self.xmap
             self.yori = self.ymap
         self.arbre.eval()
-        if self.target is not None:
-            self.target.is_attacked = False
+        self.lastLastUnit = self.lastUnit
+        self.lastUnit = None
+
+        self.is_attacked = False
     def update(self, map):
         if self.state != InnerState.DEAD:
             self.tick_progress += 1 / 60 / (tick_time)
