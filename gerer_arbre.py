@@ -98,6 +98,8 @@ class GererArbre:
         pygame.draw.lines(self.screen, (255, 0, 0), True, point_list, 2)
 
     def handle_event(self, event):
+        if event.type == pygame.QUIT:
+            sys.exit()
         if event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1: #clic gauche
                 obj_click_attr = has_clicked_on_rect(self.dico_rect_attributs, event) # regarde d'abord si on a clické sur un attribut
@@ -237,6 +239,4 @@ if __name__ == "__main__":
 
     g = GererArbre(screen, arbre)
     modifs = g.boucle_principale()
-    g = GererArbre(screen, arbre, modifs)
-    g.boucle_principale()
     pygame.quit()

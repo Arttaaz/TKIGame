@@ -108,6 +108,12 @@ class AfficherArbre:
 
         Actualise aussi le dico_rect.
         """
+        ### est-ce que l'action est déjà placée ?
+        rect_action = is_action_already_blitten(action, dico_rect)
+        if rect_action is not None:
+            return rect_action # action déjà placée, rien à faire
+
+        ### Affiche l'action de manière normale
         background_action_rect = self.background_action.get_rect()
         ### Affiche l'action
         text = self.font_action.render(action.nom, True, (0, 0, 0))
@@ -212,6 +218,17 @@ def adapt_rect_line(rect):
     """
     width = max(rect.width, LARGEUR_HIT_BOX_LIGNES_MINIMALE)
     return pygame.Rect(rect.left+rect.width//2-width//2, rect.top, width, rect.height)
+
+def is_action_already_blitten(action, dict_rect):
+    """
+    Permet de savoir si une action a déjà été dessinée
+    sur l'écran ou non.
+    Si c'est le cas, elle retourne le
+    rect où est placer l'action en question.
+    """
+    for rect in dict_rect:
+        if id(dict_rect[rect]) is id(action):
+            return pygame.Rect(rect)
 
 
 if __name__ == "__main__":
