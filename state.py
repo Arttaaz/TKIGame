@@ -26,7 +26,8 @@ class State:
         self.modifs_arbres = {}
         self.select_pos = None
         self.clicking = False
-        self.levels = ["tuto1.map", "map1.map", "bersekrabvsvacanciers.map"]
+
+        self.levels = ["tuto1.map", "map1.map", "bersekrabvsvacanciers.map", "tuto2.map"]
         self.level = 0
         self.map = Map(64, path="assets/" + self.levels[self.level])
 
