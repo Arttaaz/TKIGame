@@ -144,7 +144,6 @@ class AfficherArbre:
         for val_action in action.list_actions_suivantes:
             rect = is_action_already_blitten(action.list_actions_suivantes[val_action], dico_rect) # est-ce que l'action existe ?
             if rect is None:
-                print(val_action)
                 actions_a_afficher.append(val_action) # il faut tracer cette action
                 continue
 
