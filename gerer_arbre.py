@@ -10,7 +10,7 @@ import sys
 
 from afficher_arbre import AfficherArbre, centrer_objet
 from modifier_arbre import Modification
-from arbre import Action
+from arbre import Action, Etat
 from dimensions import *
 
 PADDING_ENCADREMENT = 10
@@ -96,16 +96,23 @@ class GererArbre:
         """
         point_list = ((rect.left-PADDING_ENCADREMENT, rect.top-PADDING_ENCADREMENT), (rect.left+rect.width+PADDING_ENCADREMENT, rect.top-PADDING_ENCADREMENT), (rect.left+rect.width+PADDING_ENCADREMENT, rect.top+rect.height+PADDING_ENCADREMENT), (rect.left-PADDING_ENCADREMENT, rect.top+rect.height+PADDING_ENCADREMENT))
         pygame.draw.lines(self.screen, (255, 0, 0), True, point_list, 2)
+
     def handle_event(self, event):
+        if event.type == pygame.QUIT:
+            sys.exit()
         if event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1: #clic gauche
-                obj_click = has_clicked_on_rect(self.dico_rect_attributs, event) # regarde d'abord si on a clické sur un attribut
-                if obj_click is not None: # on a clické sur un attribut
-                    self.gerer_click_arbre(obj_click)
-                obj_click = has_clicked_on_rect(self.dico_rect_boutons, event) # regarde si on a clické sur un bouton
-                if obj_click is not None: # on a clické sur un bouton
-                    self.gerer_click_bouton(obj_click)
+                obj_click_attr = has_clicked_on_rect(self.dico_rect_attributs, event) # regarde d'abord si on a clické sur un attribut
+                if obj_click_attr is not None: # on a clické sur un attribut
+                    self.gerer_click_arbre(obj_click_attr)
+                obj_click_bouton = has_clicked_on_rect(self.dico_rect_boutons, event) # regarde si on a clické sur un bouton
+                if obj_click_bouton is not None: # on a clické sur un bouton
+                    self.gerer_click_bouton(obj_click_bouton)
+                if obj_click_bouton is None and obj_click_attr is None: # on a clické dans le vide : réinit les sélections
+                    self.attr_selectionne = None
+                    self.ligne_selectionnee = None
         return self.quitter
+
     def render(self):
         self.lancer_affichage() # dessine l'affichage
         self.update_main_screen()
@@ -116,6 +123,7 @@ class GererArbre:
         
     def update(self):
         pass
+
     def boucle_principale(self):
         """
         Gère l'ensemble de la fenêtre ici, permets de créé des modifs grâce à la
@@ -156,7 +164,7 @@ class GererArbre:
             self.ligne_selectionnee = obj_click # selectionne la ligne
             self.attr_selectionne = None # reinit la variable
         else: # on a clické sur un attribut
-            if self.ligne_selectionnee is not None: # créé la modif associée
+            if self.ligne_selectionnee is not None and type(obj_click[0]) is not Etat: # créé la modif associée, sauf si on a clické sur un état en deuxieme (pas le droit)
                 attr_a_modifier, ancien_attr, attr_souhaite = self.ligne_selectionnee[0][0], self.ligne_selectionnee[0][1], obj_click[0]
                 debut_ligne = self.ligne_selectionnee[0][3]
                 ancien_fin_ligne = self.ligne_selectionnee[0][4]
@@ -166,7 +174,7 @@ class GererArbre:
             elif self.attr_selectionne is None: # premier attribut qu'on sélectionne et on a pas sélectionner une ligne
                 if (type(obj_click[0]) is Action and obj_click[0].list_actions_suivantes is None) or (obj_click[0].action_associee is None): # il est possible de sélectionner uniquement un attribut qui est en fin d'arbre
                     self.attr_selectionne = obj_click
-            else: # dessine la modification proposée
+            elif type(obj_click[0]) is not Etat: # dessine la modification proposée, sauf si on a clické sur un état en deuxième (interdit)
                 attr_a_modifier, attr_souhaite = self.attr_selectionne[0], obj_click[0]
                 debut_ligne = (self.attr_selectionne[1].left+self.attr_selectionne[1].width//2, self.attr_selectionne[1].top+self.attr_selectionne[1].height)
                 fin_ligne = (obj_click[1].left+obj_click[1].width//2, obj_click[1].top)
@@ -180,7 +188,6 @@ class GererArbre:
         Effectue les actions associées au clic.
         """
         if obj_click[0] == "Save":
-            self.quitter = True
             self.sauvegarder = True
         elif obj_click[0] == "Quit":
             self.quitter = True
@@ -232,6 +239,4 @@ if __name__ == "__main__":
 
     g = GererArbre(screen, arbre)
     modifs = g.boucle_principale()
-    g = GererArbre(screen, arbre, modifs)
-    g.boucle_principale()
     pygame.quit()
