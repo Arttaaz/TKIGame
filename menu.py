@@ -15,9 +15,9 @@ JOUER = 0
 CREDITS = 1
 QUITTER = 2
 
-IDLE = 1
-SURVOL = 2
-ENFONCE = 3
+IDLE = 0
+SURVOL = 1
+ENFONCE = 2
 
 
 class Menu:
@@ -77,18 +77,18 @@ class Menu:
                 obj_click = has_clicked_on_rect(self.dict_rect, event)
                 if obj_click is not None:
                     return obj_click[0] # retourne le numero du bouton clické
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: # on enfonce le clic sur un bouton ?
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: # on enfonce le clic sur un bouton ?
                     obj_click = has_clicked_on_rect(self.dict_rect, event)
-            if obj_click is not None:
-                self.etat_boutons[obj_click[0]] = ENFONCE
-            elif event.type == pygame.MOUSEMOTION: # on passe par dessus un bouton ?
-                for i in range(len(self.etat_boutons)):
-                    if self.etat_boutons[i] == SURVOL:
-                        self.etat_boutons[i] = IDLE # réinitialise l'état des boutons
+                    if obj_click is not None:
+                        self.etat_boutons[obj_click[0]] = ENFONCE
+        elif event.type == pygame.MOUSEMOTION: # on passe par dessus un bouton ?
+            for i in range(len(self.etat_boutons)):
+                if self.etat_boutons[i] == SURVOL:
+                    self.etat_boutons[i] = IDLE # réinitialise l'état des boutons
 
             obj_click = has_clicked_on_rect(self.dict_rect, event)
             if obj_click is not None:
-                self.etat_boutons[obj_click[0]] = SURVO
+                self.etat_boutons[obj_click[0]] = SURVOL
 
         return -1
 

@@ -5,6 +5,24 @@ Contient de quoi créer des comportement d'unités (des arbres).
 
 from arbre import *
 from target import Target
+
+def bronzer(param):
+    pass
+def creer_unite(unit, id):
+    if id == 1:
+        ### Code de l'état Idle
+        bronzer1 = Action('Bronzer', bronzer, ['Crème'], None)
+        selectionner_cible1 = Action('Sélectionner cible', unit.select_target, [Target.NEAREST_ENEMY], bronzer1)
+        
+        idle = Etat(selectionner_cible1, 'Idle')
+
+        ### Code de l'état Attaquer cible
+        attaquer1 = Action('Attaquer', unit.shoot, ["Ma Cible"], None)
+        
+        attaquer_cible = Etat(attaquer1, 'Attaquer')
+
+        return Arbre([idle, attaquer_cible], idle, "Unité basique")
+    return creer_unite_attaque(unit)
 def creer_unite_attaque(unit):
     """
     Créé une unité d'attaque classique.

@@ -11,7 +11,7 @@ screen = pygame.display.set_mode(size)
 
 
 clock = pygame.time.Clock()
-path = "assets/map.map"
+path = "assets/tuto1.map"
 map = Map(64, path = path)
 layer = 0
 while 1:
@@ -46,7 +46,7 @@ while 1:
                 id += 1
 
             map.remove(map_pos_x, map_pos_y, layer)
-            map.cases[map_pos_x][map_pos_y][layer] = map.generate_object(id, map_pos_x, map_pos_y)
+            map.cases[map_pos_x][map_pos_y][layer] = map.generate_object(str(id) + ";1", map_pos_x, map_pos_y)
 
 
 
