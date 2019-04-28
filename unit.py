@@ -21,7 +21,7 @@ tick_time = 0.4
 UNIT_LAYER = 2
 DEAD_LAYER = 1
 class Unit(GameObject):
-    def __init__(self, image, grid, xmap, ymap, id = 1, collide = True, team = 1):
+    def __init__(self, image, grid, xmap, ymap, id = 1, behaviour = 1, collide = True, team = 1):
         GameObject.__init__(self, image, grid, xmap, ymap, id, collide)
         self.state = InnerState.IDLE
         self.target = None
@@ -29,6 +29,7 @@ class Unit(GameObject):
         self.ymap = ymap
         self.xori = xmap
         self.yori = ymap
+        self.behaviour = behaviour
         self.team = id
         self.hp = 100
         self.hpmax = 100
@@ -36,7 +37,7 @@ class Unit(GameObject):
         self.tick_progress = 0
         self.start_shooting_time = 0
         self.start_shooting = False
-        self.arbre = creer_unite_attaque(self)
+        self.arbre = creer_unite(self, self.behaviour)
     def follow(self, target):
         pass
 
@@ -122,10 +123,8 @@ class Unit(GameObject):
 
     def tick(self):
         if self.state == InnerState.WALK:
-            self.grid.cases[self.xmap][self.ymap][UNIT_LAYER] = None
-            self.grid.cases[self.xdest][self.ydest][UNIT_LAYER] = self
-            self.xmap = self.xdest
-            self.ymap = self.ydest
+            self.xmap = self.xori
+            self.ymap = self.yori
         self.tick_progress = 0
         self.arbre.eval()
 

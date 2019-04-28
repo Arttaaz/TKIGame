@@ -109,6 +109,14 @@ class Map:
             return 0
         else:
             return object.id
+
+    def behaviour(self, x, y, z):
+        object = self.cases[x][y][z]
+        if object is None or not isinstance(object, Unit):
+            return 0
+        else:
+            return object.behaviour
+        
     def collide(self, x, y):
         for case in self.cases[x][y]:
             if case.collide:
@@ -117,11 +125,18 @@ class Map:
         return False
 
 
-    def generate_object(self, id, x, y):
+    def generate_object(self, desc, x, y):
+        words = desc.split(";")
+        id = int(words[0])
+        behaviour = 0
+        if len(words) > 1:
+            behaviour = int(words[1])
         if id == 0:
             game_object = None
-        elif id in range(2, 4):
-            game_object = Unit(pygame.image.load('assets/' + str(id) + '.png'), self, x, y, id)
+        elif id == 1:
+            game_object = GameObject(pygame.image.load('assets/Herbe' + str(random.randint(0, 1)+1) + '.png'), self,  x, y, id, False)
+        elif id in range(2, 4) or id in range(10, 12):
+            game_object = Unit(pygame.image.load('assets/' + str(id) + '.png'), self, x, y, id, behaviour)
             self.units.append(game_object)
         elif id in range(4, 10):
             game_object = GameObject(pygame.image.load('assets/' + str(id) + '.png'), self,  x, y, id, True)
@@ -130,7 +145,7 @@ class Map:
 
         return game_object
     def read_cases(self, content):
-        objects = (self.generate_object(int(c), 0, 0) for line in content for c in line.split())
+        objects = (self.generate_object(c, 0, 0) for line in content for c in line.split())
         self.cases = [[[None for k in range(self.depth)] for j in range(self.height)] for i in range(self.width)]
         self.units = []
         for k in range(self.depth):
@@ -154,7 +169,7 @@ class Map:
         f.write('\n')
         for k in range(self.depth):
             for j in range(self.height):
-                f.write(' '.join([str(self.id(i, j, k)) for i in range(self.width)]))
+                f.write(' '.join([str(self.id(i, j, k)) + ";" + str(self.behaviour(i,j,k)) for i in range(self.width)]))
                 f.write('\n')
             f.write('\n')
     def read_file(self, path):
