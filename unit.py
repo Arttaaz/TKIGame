@@ -37,6 +37,8 @@ class Unit(GameObject):
         self.tick_progress = 0
         self.start_shooting_time = 0
         self.start_shooting = False
+        self.lastUnit = None
+        self.is_attacked = False
         self.arbre = creer_unite(self, self.behaviour)
     def follow(self, target):
         pass
@@ -69,6 +71,7 @@ class Unit(GameObject):
         if self.can_shoot():
             self.set_inner_state(InnerState.SHOOT)
             self.target.hp -= 34
+            self.target.is_attacked = True
         else:
             self.set_inner_state(InnerState.FAILED)
     def heal(self, param):
@@ -77,7 +80,9 @@ class Unit(GameObject):
             self.target.hp += 10
         else:
             self.set_inner_state(InnerState.FAILED)
-
+    def subit_attaque(self):
+        return "Oui" if self.is_attacked else "Non"
+        
     def est_a_portee(self, param):
         if self.target is  None:
             return "NO TARGET"
@@ -102,7 +107,8 @@ class Unit(GameObject):
 
     def can_shoot(self):
         if self.target is not None:
-            return True  # TODO: line_of_sight function
+            if self.est_a_portee(5) == "Oui":
+                return True  # TODO: line_of_sight function
         return False
 
 
@@ -123,12 +129,12 @@ class Unit(GameObject):
 
     def tick(self):
         self.tick_progress = 0
-        if self.state == InnerState.WALK:
+        if self.state == InnerState.WALK or self.state == InnerState.IDLE:
             self.xori = self.xmap
             self.yori = self.ymap
         self.arbre.eval()
-
-
+        if self.target is not None:
+            self.target.is_attacked = False
     def update(self, map):
         if self.state != InnerState.DEAD:
             self.tick_progress += 1 / 60 / (tick_time)
