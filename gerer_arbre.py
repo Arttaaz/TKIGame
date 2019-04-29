@@ -162,7 +162,7 @@ class GererArbre:
         if self.ligne_selectionnee is None and self.attr_selectionne is None: # on sélectionne un nouvel attribut
             if (type(obj_click[0]) is Action and obj_click[0].list_actions_suivantes is None) or (obj_click[0].action_associee is None): # il est possible de sélectionner uniquement un attribut qui est en fin d'arbre
                 self.attr_selectionne = obj_click
-                return
+            return
 
         # on essaie de recâbler l'arbre
         if self.is_recablage_valide(obj_click):
