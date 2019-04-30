@@ -197,6 +197,7 @@ class GererArbre:
         """
         if obj_click[0] == "sauvegarder":
             self.sauvegarder = True
+            self.quitter = True # on quitte lors de la sauvegarde (c'est relou de clicker sur deux boutons pour sauvegarder et quitter)
         elif obj_click[0] == "quit":
             self.quitter = True
         elif obj_click[0] == "cancel":
@@ -222,7 +223,7 @@ class GererArbre:
         """
         for num, m in enumerate(self.modifs):
             if m.attribut_depart is modif.attribut_depart and m.condition is modif.condition: # doublon non authorisé !
-                self.modifs.remove(num) # supprime l'entrée
+                self.modifs.remove(m) # supprime l'entrée
                 self.modifs.append(modif)
                 return
 
