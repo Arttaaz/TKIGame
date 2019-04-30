@@ -40,7 +40,7 @@ class AfficherArbre:
         self.background_etat = pygame.image.load('assets/arbre/background_etat.png').convert()
         self.background_action = pygame.image.load('assets/arbre/background_action.png').convert()
         self.background_params = pygame.image.load('assets/arbre/background_parametre.png').convert()
-        self.background_etat_defaut = pygame.image.load('assets/arbre/background_parametre.png').convert()
+        self.background_etat_defaut = pygame.image.load('assets/arbre/background_etat_defaut.png').convert()
 
         pygame.font.init() # initialise le module font
         self.font_etat = pygame.font.SysFont(pygame.font.get_default_font(), TAILLE_FONT_ATTRIBUTS, bold=True)
@@ -106,7 +106,7 @@ class AfficherArbre:
         coords_etat_defaut = (fin_coords_nom_arbre[0]+text_nom.get_rect().width//2-self.background_etat_defaut.get_rect().width, fin_coords_nom_arbre[1])
         rect_text = pygame.Rect(coords_etat_defaut, (self.background_etat_defaut.get_rect().width, self.background_etat_defaut.get_rect().height))
         self.screen.blit(self.background_etat_defaut, coords_etat_defaut)
-        blit_text_properly(self.screen, self.arbre.etat_courant.nom_etat, rect_text, self.font_etat, TAILLE_FONT_PARAMS)
+        blit_text_properly(self.screen, self.arbre.etat_courant.nom_etat, rect_text, self.font_etat, TAILLE_FONT_ATTRIBUTS)
 
         return dico_rect
 

@@ -1,13 +1,18 @@
+"""
+Objet permettant d'implémenter une unité
+dans le jeu. Contient toutes les fonctions
+pour que l'unité puisse intéragir grâce à son arbre
+de comportement.
+"""
 
-"""
-Ennemi.
-"""
 import pygame
 from enum import Enum
 import astar
 from gameobject import GameObject
 from creer_arbre import *
 from target import Target
+
+
 class InnerState(Enum):
     IDLE = "Idle"
     SHOOT = "Attaquer"
@@ -16,22 +21,25 @@ class InnerState(Enum):
     WALK = "Marche"
     DEAD = "DEAD"
 
-bullet_time = 0.3
-tick_time = 0.4
+
+BULLET_TIME = 0.3
+TICK_TIME = 0.4
 UNIT_LAYER = 2
 DEAD_LAYER = 1
+DOMMAGES_ATTAQUE = 34
+SOIN_ATTAQUE = 34
+
+
 class Unit(GameObject):
-    def __init__(self, image, grid, xmap, ymap, id = 1, behaviour = 1, collide = True, team = 1):
-        GameObject.__init__(self, image, grid, xmap, ymap, id, collide)
+    def __init__(self, image, grid, xmap, ymap, id_unit=1, behaviour=1, collide=True, team=1):
+        GameObject.__init__(self, image, grid, xmap, ymap, id_unit, collide)
         self.state = InnerState.IDLE
         self.target = None
-        self.xmap = xmap
-        self.ymap = ymap
-        self.xori = xmap
-        self.yori = ymap
+        self.xmap, self.ymap = xmap, ymap
+        self.xori, self.yori = xmap, ymap
         self.behaviour = behaviour
-        self.team = id % 2
-        self.hp = 100 * (self.team + 1)
+        self.team = id_unit % 2
+        self.hp = 100 * (self.team + 1) # l'équipe 1 a deux fois plus de hp que l'équipe 2
         self.hpmax = 100 * (self.team + 1)
         self.bullet_progress = 0
         self.tick_progress = 0
@@ -41,11 +49,12 @@ class Unit(GameObject):
         self.lastLastUnit = None
         self.is_attacked = False
         self.arbre = creer_unite(self, self.behaviour)
-    def follow(self, target):
-        pass
-
 
     def move(self, param):
+        """
+        Fonction 'Marcher vers' pour l'arbre.
+        Utilise l'algo astar pour le path finding.
+        """
         if self.target is not None:
             path = astar.find_path((self.xmap, self.ymap), (self.target.xmap, self.target.ymap), neighbors_fnct=neighbors_map(self.grid, self.target), heuristic_cost_estimate_fnct=cost, distance_between_fnct=dist)
             if path is not None:
@@ -59,89 +68,131 @@ class Unit(GameObject):
                 self.grid.cases[self.xori][self.yori][UNIT_LAYER] = None
                 self.grid.cases[self.xmap][self.ymap][UNIT_LAYER] = self
 
-
     def set_inner_state(self, state):
+        """
+        Permet nottament de modifier l'état de l'unité
+        comme étant 'THREAT', c'est à dire que l'unité
+        est en train de se faire attaqué.
+        """
         self.state = state
+
     def set_tree_state(self, state):
+        """
+        Fonction 'Changer état' pour l'arbre.
+        """
         self.arbre.set_state(state)
+
     def select_target(self, target):
+        """
+        Fonction 'Selectionner cible' pour l'arbre.
+        """
         if target == Target.NEAREST_ENEMY:
             self.target = self.grid.closest_unit(self, False)
-        if target == Target.NEAREST_ALLY:
+        elif target == Target.NEAREST_ALLY:
             self.target = self.grid.closest_unit(self, True)
-        if target == Target.FARTHEST_ENEMY:
+        elif target == Target.FARTHEST_ENEMY:
             self.target = self.grid.farthest_unit(self, False)
-        if target == Target.FARTHEST_ALLY:
+        elif target == Target.FARTHEST_ALLY:
             self.target = self.grid.closest_unit(self, True)
-        if target == Target.THREAT:
-            self.target = self.lastLastUnit
+        elif target == Target.THREAT:
+            self.target = self.lastLastUnit # représente la dernière unité à avoir attaqué cette unité
             if self.target is None:
                 self.target = self.grid.closest_unit(self, False)
-        if target == Target.MAX_LIFE_ENEMY:
+        elif target == Target.MAX_LIFE_ENEMY:
             self.target = self.grid.high_hp_unit(self, False)
-        if target == Target.MIN_LIFE_ENEMY:
+        elif target == Target.MIN_LIFE_ENEMY:
             self.target = self.grid.low_hp_unit(self, False)
-        if target == Target.MAX_LIFE_ALLY:
+        elif target == Target.MAX_LIFE_ALLY:
             self.target = self.grid.high_hp_unit(self, True)
-        if target == Target.MIN_LIFE_ALLY:
+        elif target == Target.MIN_LIFE_ALLY:
             self.target = self.grid.low_hp_unit(self, True)
-        if target == Target.RANDOM_ENEMY:
+        elif target == Target.RANDOM_ENEMY:
             self.target = self.grid.high_hp_unit(self, False)
-        if target == Target.RANDOM_ALLY:
+        elif target == Target.RANDOM_ALLY:
             self.target = self.grid.low_hp_unit(self, True)
-
 
     def shoot(self, param):
+        """
+        Fonction 'Attaquer' pour l'arbre.
+        """
         if self.can_shoot():
             self.set_inner_state(InnerState.SHOOT)
-            self.target.hp -= 34
+            self.target.hp -= DOMMAGES_ATTAQUE
             self.target.is_attacked = True
             self.target.lastUnit = self
         else:
             self.set_inner_state(InnerState.FAILED)
+
     def heal(self, param):
+        """
+        Fonction 'Soin' pour l'arbre.
+        """
         if self.target is not None and self.can_shoot():
             self.set_inner_state(InnerState.HEAL)
-            self.target.hp += 34
+            self.target.hp += SOINS_ATTAQUE
         else:
             self.set_inner_state(InnerState.FAILED)
+
     def subit_attaque(self):
+        """
+        Fonction 'Menacé ?' pour l'arbre.
+        """
         return "Oui" if self.is_attacked else "Non"
 
     def est_a_portee(self, param):
-        if self.target is  None:
+        """
+        Fonction 'A portée' pour l'arbre.
+        """
+        if self.target is None:
             return "NO TARGET"
-        # return  "Oui" if self.has_line_of_sight() else "Non"
         return  "Oui" if ((dist((self.target.xmap, self.target.ymap), (self.xmap, self.ymap)) <= 3) and self.has_line_of_sight()) else "Non"
 
     def rotation_to_target(self):
-
+        """
+        Permet de faire pointer l'unité vers sa cible courante.
+        """
         pos1 = pygame.Vector2(self.rect.centerx, self.rect.centery)
         pos2 = pygame.Vector2(self.target.rect.centerx, self.target.rect.centery)
-        dir = pos2 - pos1
+        direction = pos2 - pos1
         y = pygame.Vector2(0, 1)
-        return( 180 - y.angle_to(dir)) % 360
+        return (180 - y.angle_to(direction)) % 360
+
     def am_i_dead(self, param):
+        """
+        On meurt lorsqu'on a plus de hp (no shit).
+        """
         return self.hp <= 0
+
     def is_dead(self, param):
+        """
+        Fonction 'Est mort ?' pour l'arbre.
+        """
         if self.target is None or self.target.am_i_dead(param):
             return "Oui"
         else:
             return "Non"
 
-
     def can_shoot(self):
+        """
+        On peut tirer que si on a bien une target, et qu'on a la ligne de vue
+        sur celle ci.
+        """
         if self.target is not None and self.has_line_of_sight():
-                return True  # TODO: line_of_sight function
+                return True
         return False
 
-
     def has_line_of_sight(self):
+        """
+        Utilise un vecteur dirigé de l'unité à l'unité ciblée. Ce vecteur
+        pointe toutes les cases sur lesquelles il passe en faisant la ligne
+        droite d'une unité à l'autre.
+        Si un obstacle est rencontré, on retourne False, sinon on retourne True.
+        """
         vec = pygame.Vector2(self.target.xmap - self.xmap, self.target.ymap - self.ymap)
-        len = vec.length()
-        vec = vec.normalize()/4
-        vec_n = vec.normalize()/4
-        while vec.length() < len:
+        longueur_chemin = vec.length()
+        vec = vec.normalize()/4 # vecteur petit, que l'on va faire grandir jusqu'à dépasser la longueur du chemin
+        vec_n = vec.normalize()/4 # vecteur que l'on ajoute au vecteur initial pour le faire grandir
+        while vec.length() < longueur_chemin:
             case = self.grid.cases[self.xmap + round(vec.x)][self.ymap + round(vec.y)][UNIT_LAYER]
             if case is not None:
                 if case.collide and ((case != self.target) and (case != self)):
@@ -150,8 +201,12 @@ class Unit(GameObject):
 
         return True
 
-
     def tick(self):
+        """
+        Actualise le comportement de l'unité.
+        Réinitialise certaines variables qui ont
+        une durée de vie que d'un tick.
+        """
         self.tick_progress = 0
         if self.state == InnerState.WALK or self.state == InnerState.IDLE:
             self.xori = self.xmap
@@ -161,9 +216,10 @@ class Unit(GameObject):
         self.lastUnit = None
 
         self.is_attacked = False
+
     def update(self, map):
         if self.state != InnerState.DEAD:
-            self.tick_progress += 1 / 60 / (tick_time)
+            self.tick_progress += 1 / 60 / (TICK_TIME)
         if self.state != InnerState.DEAD and self.tick_progress > 1:
             self.tick()
 
@@ -177,9 +233,7 @@ class Unit(GameObject):
         if self.state == InnerState.DEAD:
             self.rotation = 0
         elif self.target is not None:
-
             self.rotation = 0.9 * self.rotation + 0.1 * self.rotation_to_target()
-
 
     def draw(self, screen, x, y):
         if self.state == InnerState.WALK or self.state == InnerState.DEAD:
