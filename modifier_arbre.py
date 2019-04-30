@@ -40,7 +40,7 @@ class Modification:
         à modifier.
         """
         pygame.draw.line(screen, self.couleur_fleche_ajoutee, self.debut_ligne, self.fin_ligne_souhaite, WIDTH_LIGNES)
-        if self.ancien_fin_ligne is not None: # dans le cas où il y a un ancien ligne
+        if self.ancien_fin_ligne is not None: # dans le cas où il y a une ancienne ligne
             pygame.draw.line(screen, self.couleur_fleche_enlevee, self.debut_ligne, self.ancien_fin_ligne, WIDTH_LIGNES)
 
         if self.condition is not None: # on recopie la condition
@@ -52,11 +52,11 @@ class Modification:
         """
         Enregistre la modification sur l'arbre.
         """
-        if type(self.attribut_depart) is type(Etat): # Cas où on modifie le cablâge d'un état
+        if isinstance(self.attribut_depart, Etat): # Cas où on modifie le cablâge d'un état
             self.attribut_depart.action_associee = self.attribut_fin
             return
 
-        if self.condition is None:
-            self.attribut_depart.list_actions_suivantes = self.attribut_fin
+        if self.condition is None and type(self.attribut_depart.list_actions_suivantes) is not type({}):
+            self.attribut_depart.list_actions_suivantes = {None : self.attribut_fin} # initialise le dico
         else:
             self.attribut_depart.list_actions_suivantes[self.condition] = self.attribut_fin

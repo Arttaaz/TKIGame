@@ -16,8 +16,8 @@ PADDING_ARBRE_COTES = 15
 TAILLE_FONT_NOM = 40
 TAILLE_FONT_ATTRIBUTS = 20
 TAILLE_FONT_PARAMS = 15
-TAILLE_FONT_CONDITIONS = 10
-TAILLE_FONT_MINIMUM = 4
+TAILLE_FONT_CONDITIONS = 20
+TAILLE_FONT_MINIMUM = 10
 DECALAGE_ATTRIBUTS_HAUTEUR = 100 # distance entre deux attributs alignés
 WIDTH_LIGNES = 3
 WIDTH_LIGNES_BLOQUEES = 5
@@ -40,6 +40,7 @@ class AfficherArbre:
         self.background_etat = pygame.image.load('assets/arbre/background_etat.png').convert()
         self.background_action = pygame.image.load('assets/arbre/background_action.png').convert()
         self.background_params = pygame.image.load('assets/arbre/background_parametre.png').convert()
+        self.background_etat_defaut = pygame.image.load('assets/arbre/background_etat_defaut.png').convert()
 
         pygame.font.init() # initialise le module font
         self.font_etat = pygame.font.SysFont(pygame.font.get_default_font(), TAILLE_FONT_ATTRIBUTS, bold=True)
@@ -101,6 +102,12 @@ class AfficherArbre:
         for coords in coords_debut_etat:
             pygame.draw.line(self.screen, COULEUR_FLECHE_BLOQUEE, fin_coords_nom_arbre, coords, WIDTH_LIGNES_BLOQUEES)
 
+        ### Dessine l'état par défaut de l'arbre
+        coords_etat_defaut = (fin_coords_nom_arbre[0]+text_nom.get_rect().width//2-self.background_etat_defaut.get_rect().width, fin_coords_nom_arbre[1])
+        rect_text = pygame.Rect(coords_etat_defaut, (self.background_etat_defaut.get_rect().width, self.background_etat_defaut.get_rect().height))
+        self.screen.blit(self.background_etat_defaut, coords_etat_defaut)
+        blit_text_properly(self.screen, self.arbre.etat_courant.nom_etat, rect_text, self.font_etat, TAILLE_FONT_ATTRIBUTS)
+
         return dico_rect
 
     def afficher_action(self, action, coord_action, place_dispo_largeur, dico_rect):
@@ -124,13 +131,12 @@ class AfficherArbre:
         blit_text_properly(self.screen, action.nom, pygame.Rect(coords, (background_action_rect.width, background_action_rect.height)), self.font_action, TAILLE_FONT_ATTRIBUTS)
 
         ### Affiche les paramètres
-        coords_params = (coords[0]+background_action_rect.width, coords[1])
+        coords_params = (coords[0]+background_action_rect.width//2, coords[1]+background_action_rect.height)
         params = action.params_action_associee
         if params is not None:
             for p in params:
                 self.screen.blit(self.background_params, coords_params)
                 blit_text_properly(self.screen, p, pygame.Rect(coords_params, (self.background_params.get_rect().width, self.background_params.get_rect().height)), self.font_params, TAILLE_FONT_PARAMS)
-                # self.screen.blit(text, coords_text)
                 coords_params = (coords_params[0], coords_params[1]+self.background_params.get_rect().height)
 
         ### Actualise le dico
@@ -215,6 +221,7 @@ def adapter_taille_font(font, msg, longueur_limite, taille_initiale):
             return taille_font
         taille_font -= 1
         font = changer_width_font(font, taille_font)
+    return TAILLE_FONT_MINIMUM
 
 
 def changer_width_font(font, nv_width):

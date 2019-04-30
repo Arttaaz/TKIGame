@@ -197,6 +197,7 @@ class GererArbre:
         """
         if obj_click[0] == "sauvegarder":
             self.sauvegarder = True
+            self.quitter = True # on quitte lors de la sauvegarde (c'est relou de clicker sur deux boutons pour sauvegarder et quitter)
         elif obj_click[0] == "quit":
             self.quitter = True
         elif obj_click[0] == "cancel":
