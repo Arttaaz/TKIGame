@@ -13,6 +13,14 @@ from creer_arbre import *
 from target import Target
 
 
+BULLET_TIME = 0.3
+TICK_TIME = 0.4
+UNIT_LAYER = 2
+DEAD_LAYER = 1
+DOMMAGES_ATTAQUE = 34
+SOIN_ATTAQUE = 34
+
+
 class InnerState(Enum):
     IDLE = "Idle"
     SHOOT = "Attaquer"
@@ -22,32 +30,30 @@ class InnerState(Enum):
     DEAD = "DEAD"
 
 
-BULLET_TIME = 0.3
-TICK_TIME = 0.4
-UNIT_LAYER = 2
-DEAD_LAYER = 1
-DOMMAGES_ATTAQUE = 34
-SOIN_ATTAQUE = 34
-
-
 class Unit(GameObject):
     def __init__(self, image, grid, xmap, ymap, id_unit=1, behaviour=1, collide=True, team=1):
         GameObject.__init__(self, image, grid, xmap, ymap, id_unit, collide)
+
         self.state = InnerState.IDLE
-        self.target = None
         self.xmap, self.ymap = xmap, ymap
         self.xori, self.yori = xmap, ymap
         self.behaviour = behaviour
+        self.image_dead = pygame.image.load('assets/grave.png')
+
         self.team = id_unit % 2
         self.hp = 100 * (self.team + 1) # l'équipe 1 a deux fois plus de hp que l'équipe 2
         self.hpmax = 100 * (self.team + 1)
+        self.target = None
+
         self.bullet_progress = 0
         self.tick_progress = 0
         self.start_shooting_time = 0
         self.start_shooting = False
+
         self.lastUnit = None
         self.lastLastUnit = None
         self.is_attacked = False
+
         self.arbre = creer_unite(self, self.behaviour)
 
     def move(self, param):
@@ -190,6 +196,10 @@ class Unit(GameObject):
         """
         vec = pygame.Vector2(self.target.xmap - self.xmap, self.target.ymap - self.ymap)
         longueur_chemin = vec.length()
+        if longueur_chemin <= 0.2: # les deux unités sont déjà presque sur la même case, pas besoin de checker
+            return True # sans ça, le normalize peut lancer une exception de division par 0
+
+
         vec = vec.normalize()/4 # vecteur petit, que l'on va faire grandir jusqu'à dépasser la longueur du chemin
         vec_n = vec.normalize()/4 # vecteur que l'on ajoute au vecteur initial pour le faire grandir
         while vec.length() < longueur_chemin:
@@ -217,16 +227,19 @@ class Unit(GameObject):
 
         self.is_attacked = False
 
-    def update(self, map):
+    def update(self):
+        """
+        Actualise l'unité en fonction de l'état dans lequel elle est.
+        """
         if self.state != InnerState.DEAD:
-            self.tick_progress += 1 / 60 / (TICK_TIME)
-        if self.state != InnerState.DEAD and self.tick_progress > 1:
+            self.tick_progress += 1 / 60 / (TICK_TIME) # avance la valeur du tick, permet de savoir quand il faut actualiser le comportement
+        if self.state != InnerState.DEAD and self.tick_progress > 1: # on actualise le comportement !
             self.tick()
 
         if self.hp <= 0 and self.state != InnerState.DEAD:
-            self.image = pygame.image.load('assets/grave.png')
+            self.image = self.image_dead
             self.state = InnerState.DEAD
-            self.collide = False
+            self.collide = False # une unité morte ne bloque pas le passage ni la ligne de vue
             self.grid.cases[self.xmap][self.ymap][UNIT_LAYER] = None
             self.grid.cases[self.xmap][self.ymap][DEAD_LAYER] = self
 
@@ -236,29 +249,39 @@ class Unit(GameObject):
             self.rotation = 0.9 * self.rotation + 0.1 * self.rotation_to_target()
 
     def draw(self, screen, x, y):
+        """
+        Dessine l'unité en prenant en compte l'état dans
+        lequel elle est.
+        Dessine aussi les particules qu'elle emets.
+        """
         if self.state == InnerState.WALK or self.state == InnerState.DEAD:
-            x += (self.xori - self.xmap) * self.grid.cell_size * (1 - self.tick_progress)
+            x += (self.xori - self.xmap) * self.grid.cell_size * (1 - self.tick_progress) # tick_progress représente un pourcentage d'avancement
             y += (self.yori - self.ymap) * self.grid.cell_size * (1 - self.tick_progress)
-        super().draw(screen, x, y)
-        if self.state != InnerState.DEAD:
+        super().draw(screen, x, y) 
+
+        if self.state != InnerState.DEAD: # dessine la barre de vie
             screen.fill((255, 0, 0), rect=pygame.Rect(self.rect.centerx - 32 + 15, self.rect.centery - 32 + 50, 34 , 5))
             screen.fill((0, 255, 0), rect=pygame.Rect(self.rect.centerx - 32 + 15, self.rect.centery - 32 + 50, int(34 * self.hp/self.hpmax), 5))
+
         if self.state in [InnerState.SHOOT, InnerState.HEAL] and self.target is not None and self.can_shoot():
             pos1 = pygame.Vector2(self.rect.centerx, self.rect.centery)
             pos2 = pygame.Vector2(self.target.rect.centerx, self.target.rect.centery)
-            if pos1 != pos2:
-                dir = (pos2 - pos1).normalize()
+            if pos1 != pos2: # pour ne pas normaliser un vecteur nul
+                return
 
-                begin = pos1 +  dir * 23
-                end = pos2 - dir * 11
+            direction = (pos2 - pos1).normalize()
 
-                if self.state == InnerState.SHOOT:
-                    self.bullet_progress = (self.tick_progress * 4) % 2
-                    self.bullet_progress = 1 if self.bullet_progress > 1 else self.bullet_progress
-                    draw_progress_line(screen, begin, end, self.bullet_progress, 0.1, 0.9, (0, 0, 0))
-                if self.state == InnerState.HEAL:
-                    self.soin_progress = (self.tick_progress * 2) % 2
-                    draw_progress_line(screen, begin, end, self.soin_progress, 0.4, 0.6, (0, 255, 0))
+            begin = pos1 +  direction * 23
+            end = pos2 - direction * 11
+
+            if self.state == InnerState.SHOOT: # dessine le tir d'attaque
+                self.bullet_progress = (self.tick_progress * 4) % 2
+                self.bullet_progress = 1 if self.bullet_progress > 1 else self.bullet_progress
+                draw_progress_line(screen, begin, end, self.bullet_progress, 0.1, 0.9, (0, 0, 0))
+            else: # dessine le tir de soin
+                self.soin_progress = (self.tick_progress * 2) % 2
+                draw_progress_line(screen, begin, end, self.soin_progress, 0.4, 0.6, (0, 255, 0))
+
 def draw_progress_line(screen,begin, end, progress, deb_time, end_time, color):
     if progress < deb_time:
         p1 = begin
@@ -274,30 +297,42 @@ def draw_progress_line(screen,begin, end, progress, deb_time, end_time, color):
         pygame.draw.aaline(screen, color, (p1.x, p1.y),
                                (p2.x, p2.y))
 
-def neighbors_map(map, goal):
+def neighbors_map(carte, goal):
+    """
+    Retourne une fonction
+    qui calcule les voisoins autour d'un
+    point. Cette fonction retourne les points
+    voisins ayant pour valeur la valeur goal
+    donnée.
+    """
     def neighbors(unit):
-
         l = []
-
         x, y = unit
 
-        if x < (map.width-1) and (map.cases[x+1][y][UNIT_LAYER] is None or map.cases[x+1][y][UNIT_LAYER] == goal or not map.cases[x+1][y][UNIT_LAYER].collide):
+        if x < (carte.width-1) and (carte.cases[x+1][y][UNIT_LAYER] is None or carte.cases[x+1][y][UNIT_LAYER] == goal or not carte.cases[x+1][y][UNIT_LAYER].collide):
             l.append((x+1, y))
-        if x > 0 and (map.cases[x-1][y][UNIT_LAYER] is None or map.cases[x-1][y][UNIT_LAYER] == goal or not map.cases[x-1][y][UNIT_LAYER].collide):
+        if x > 0 and (carte.cases[x-1][y][UNIT_LAYER] is None or carte.cases[x-1][y][UNIT_LAYER] == goal or not carte.cases[x-1][y][UNIT_LAYER].collide):
             l.append((x-1, y))
-        if y < (map.height-1) and (map.cases[x][y+1][UNIT_LAYER] is None or map.cases[x][y+1][UNIT_LAYER] == goal or not map.cases[x][y+1][UNIT_LAYER].collide):
+        if y < (carte.height-1) and (carte.cases[x][y+1][UNIT_LAYER] is None or carte.cases[x][y+1][UNIT_LAYER] == goal or not carte.cases[x][y+1][UNIT_LAYER].collide):
             l.append((x, y+1))
-        if y > 0 and (map.cases[x][y-1][UNIT_LAYER] is None or map.cases[x][y-1][UNIT_LAYER] == goal or not map.cases[x][y-1][UNIT_LAYER].collide):
+        if y > 0 and (carte.cases[x][y-1][UNIT_LAYER] is None or carte.cases[x][y-1][UNIT_LAYER] == goal or not carte.cases[x][y-1][UNIT_LAYER].collide):
             l.append((x, y-1))
         return l
 
     return neighbors
 
 
+### Fonctions pour le pathfinding du astar
 def cost(n, goal):
+    """
+    Fonction de coût basique.
+    """
     return 1
 
 def dist(u0, u1):
+    """
+    Distance euclidienne.
+    """
     x0, y0 = u0
     x1, y1 = u1
     return ((x1 - x0)**2 + (y1 - y0)**2)**0.5

@@ -9,7 +9,6 @@ import pygame
 import random
 
 class Map:
-
     def __init__(self, cell_size, width = 0, height = 0, depth = 0, path = None):
         self.cell_size = cell_size
         self.surf = None
@@ -21,12 +20,15 @@ class Map:
             self.height = height
             self.depth = depth
             self.units = []
+
     def update(self):
         for k in range(self.depth):
             for i in range(self.width):
                 for j in range(self.height):
                     if self.cases[i][j][k] is not None:
-                        self.cases[i][j][k].update(self)
+                        print(type(self.cases[i][j][k]))
+                        self.cases[i][j][k].update()
+
     def draw(self, screen, x, y):
         if self.surf is None:
             self.surf = pygame.Surface((screen.get_width(), screen.get_height()))

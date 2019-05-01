@@ -1,7 +1,7 @@
 import pygame
 class GameObject:
 
-    def __init__(self, image, grid, xmap, ymap, id = 0,  collide=False):
+    def __init__(self, image, grid, xmap, ymap, id_obj=0, collide=False):
         self.image = image
         self.image_to_draw = image
         self.grid = grid
@@ -10,9 +10,10 @@ class GameObject:
         self.collide = collide
         self.rotation = 0
         self.rect = image.get_rect()
-        self.id = id
+        self.id = id_obj
         self.last_rotation = 0
-    def update(self, map):
+
+    def update(self):
         pass
 
     def draw(self, screen, x, y):
