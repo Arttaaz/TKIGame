@@ -252,7 +252,7 @@ class Unit(GameObject):
         """
         Dessine l'unité en prenant en compte l'état dans
         lequel elle est.
-        Dessine aussi les particules qu'elle emets.
+        Dessine aussi les particules qu'elle emet.
         """
         if self.state == InnerState.WALK or self.state == InnerState.DEAD:
             x += (self.xori - self.xmap) * self.grid.cell_size * (1 - self.tick_progress) # tick_progress représente un pourcentage d'avancement
@@ -266,7 +266,7 @@ class Unit(GameObject):
         if self.state in [InnerState.SHOOT, InnerState.HEAL] and self.target is not None and self.can_shoot():
             pos1 = pygame.Vector2(self.rect.centerx, self.rect.centery)
             pos2 = pygame.Vector2(self.target.rect.centerx, self.target.rect.centery)
-            if pos1 != pos2: # pour ne pas normaliser un vecteur nul
+            if pos1 == pos2: # pour ne pas normaliser un vecteur nul
                 return
 
             direction = (pos2 - pos1).normalize()
