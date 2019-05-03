@@ -19,8 +19,8 @@ black = 0, 0, 0
 
 # Current game state is always last element of self.state
 class State:
-    def __init__(self, screen):
-        self.state  = [GameState.MENU] # TODO: change to MENU when menu exists
+    def __init__(
+        self.state  = [GameState.MENU]
         self.screen = screen
         self.menu = Menu()
         self.arbre_surface = pygame.Surface((screen.get_width(), screen.get_height()))  # the size of your rect
